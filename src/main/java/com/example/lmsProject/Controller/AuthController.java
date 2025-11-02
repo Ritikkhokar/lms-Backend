@@ -1,6 +1,8 @@
 package com.example.lmsProject.Controller;
 
+import com.example.lmsProject.dto.AuthResponse;
 import com.example.lmsProject.dto.LoginRequest;
+import com.example.lmsProject.dto.UserDto;
 import com.example.lmsProject.entity.User;
 import com.example.lmsProject.security.JwtUtil;
 import com.example.lmsProject.service.UserService;
@@ -26,7 +28,13 @@ public class AuthController {
         if (user != null && user.getPasswordHash().equals(loginRequest.getPassword())) {
             // Normally hash check here; replace with your own password strategy!
             String jwt = JwtUtil.generateToken(user.getEmail());
-            return ResponseEntity.ok(Map.of("token", jwt));
+            UserDto userDto = new UserDto(
+                    user.getUserId(),
+                    user.getFullName(),
+                    user.getEmail(),
+                    user.getRole().getRoleName() // or however you fetch role name
+            );
+            return ResponseEntity.ok(new AuthResponse(jwt, userDto));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }

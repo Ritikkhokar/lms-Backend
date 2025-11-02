@@ -1,5 +1,6 @@
 package com.example.lmsProject.Controller;
 
+import com.example.lmsProject.dto.UserDto;
 import com.example.lmsProject.entity.User;
 import com.example.lmsProject.service.UserService;
 import org.slf4j.Logger;
@@ -27,12 +28,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable Integer id) {
         User user = userService.getUserById(id);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(user);
+        UserDto userDto = new UserDto(
+                user.getUserId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getRole().getRoleName() // or however you fetch role name
+        );
+        return ResponseEntity.ok(userDto);
     }
 
     @PostMapping
