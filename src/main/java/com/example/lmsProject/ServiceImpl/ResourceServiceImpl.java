@@ -1,14 +1,18 @@
 package com.example.lmsProject.ServiceImpl;
 
+import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.ResourceRepository;
 import com.example.lmsProject.entity.Resource;
 import com.example.lmsProject.service.ResourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ResourceServiceImpl.class);
     private final ResourceRepository resourceRepository;
 
     public ResourceServiceImpl(ResourceRepository repo) {

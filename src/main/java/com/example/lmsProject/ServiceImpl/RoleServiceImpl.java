@@ -1,14 +1,20 @@
 package com.example.lmsProject.ServiceImpl;
 
+import com.example.lmsProject.Controller.AuthController;
+import com.example.lmsProject.Controller.RoleController;
 import com.example.lmsProject.Repository.RoleRepository;
 import com.example.lmsProject.entity.Role;
 import com.example.lmsProject.service.RoleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class RoleServiceImpl implements RoleService {
+
+    private static final Logger logger = LoggerFactory.getLogger(RoleServiceImpl.class);
     private final RoleRepository roleRepo;
     public RoleServiceImpl(RoleRepository repo) { this.roleRepo = repo; }
 

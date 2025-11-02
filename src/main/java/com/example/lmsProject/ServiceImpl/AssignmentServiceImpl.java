@@ -1,14 +1,18 @@
 package com.example.lmsProject.ServiceImpl;
 
+import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.AssignmentRepository;
 import com.example.lmsProject.entity.Assignment;
 import com.example.lmsProject.service.AssignmentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class AssignmentServiceImpl implements AssignmentService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AssignmentServiceImpl.class);
     private final AssignmentRepository assignmentRepository;
 
     public AssignmentServiceImpl(AssignmentRepository repo) {

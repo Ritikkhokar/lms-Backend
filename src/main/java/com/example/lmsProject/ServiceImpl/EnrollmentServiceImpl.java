@@ -1,14 +1,18 @@
 package com.example.lmsProject.ServiceImpl;
 
+import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.EnrollmentRepository;
 import com.example.lmsProject.entity.Enrollment;
 import com.example.lmsProject.service.EnrollmentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EnrollmentServiceImpl.class);
     private final EnrollmentRepository enrollmentRepository;
 
     public EnrollmentServiceImpl(EnrollmentRepository repo) {

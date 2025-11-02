@@ -2,6 +2,8 @@ package com.example.lmsProject.Controller;
 
 import com.example.lmsProject.entity.Assignment;
 import com.example.lmsProject.service.AssignmentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import java.util.List;
 @RequestMapping("/api/assignments")
 public class AssignmentController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AssignmentController.class);
     private final AssignmentService assignmentService;
 
     public AssignmentController(AssignmentService service) {

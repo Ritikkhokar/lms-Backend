@@ -2,6 +2,8 @@ package com.example.lmsProject.Controller;
 
 import com.example.lmsProject.entity.Resource;
 import com.example.lmsProject.service.ResourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import java.util.List;
 @RequestMapping("/api/resources")
 public class ResourceController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ResourceController.class);
     private final ResourceService resourceService;
 
     public ResourceController(ResourceService service) {

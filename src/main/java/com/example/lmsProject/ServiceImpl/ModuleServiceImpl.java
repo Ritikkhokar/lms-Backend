@@ -1,7 +1,10 @@
 package com.example.lmsProject.ServiceImpl;
 
+import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.ModuleRepository;
 import com.example.lmsProject.service.ModuleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.example.lmsProject.entity.Module;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.List;
 @Service
 public class ModuleServiceImpl implements ModuleService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ModuleServiceImpl.class);
     private final ModuleRepository moduleRepository;
 
     public ModuleServiceImpl(ModuleRepository repo) {

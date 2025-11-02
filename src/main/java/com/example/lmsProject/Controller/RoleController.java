@@ -2,6 +2,8 @@ package com.example.lmsProject.Controller;
 
 import com.example.lmsProject.entity.Role;
 import com.example.lmsProject.service.RoleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/roles")
 public class RoleController {
+    private static final Logger logger = LoggerFactory.getLogger(RoleController.class);
     private final RoleService roleService;
     public RoleController(RoleService service) { this.roleService = service; }
 

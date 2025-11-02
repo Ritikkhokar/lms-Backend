@@ -2,6 +2,8 @@ package com.example.lmsProject.Controller;
 
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.service.CourseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import java.util.List;
 @RequestMapping("/api/courses")
 public class CourseController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CourseController.class);
     private final CourseService courseService;
 
     public CourseController(CourseService service) {

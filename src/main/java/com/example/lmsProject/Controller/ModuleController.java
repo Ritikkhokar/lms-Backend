@@ -1,6 +1,8 @@
 package com.example.lmsProject.Controller;
 
 import com.example.lmsProject.service.ModuleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import com.example.lmsProject.entity.Module;
 @RequestMapping("/api/modules")
 public class ModuleController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ModuleController.class);
     private final ModuleService moduleService;
 
     public ModuleController(ModuleService service) {
