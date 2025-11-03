@@ -1,6 +1,5 @@
 package com.example.lmsProject.ServiceImpl;
 
-import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.CourseRepository;
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.service.CourseService;
@@ -49,5 +48,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void deleteCourse(Integer id) {
         courseRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Course> getCoursesByUserId(Integer userId) {
+        return courseRepository.findByCreatedBy_UserId(userId);
     }
 }

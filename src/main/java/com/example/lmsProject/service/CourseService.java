@@ -8,4 +8,5 @@ public interface CourseService {
     Course createCourse(Course course);
     Course updateCourse(Integer id, Course course);
     void deleteCourse(Integer id);
+    List<Course> getCoursesByUserId(Integer userId);
 }

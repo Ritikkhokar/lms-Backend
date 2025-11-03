@@ -55,4 +55,9 @@ public class CourseController {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/coursesByUserId/{id}")
+    public ResponseEntity<List<Course>> getCoursesByUserId(@PathVariable Integer id){
+       return ResponseEntity.ok( courseService.getCoursesByUserId(id));
+    }
 }
