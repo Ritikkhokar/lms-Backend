@@ -1,6 +1,5 @@
 package com.example.lmsProject.ServiceImpl;
 
-import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.AssignmentRepository;
 import com.example.lmsProject.entity.Assignment;
 import com.example.lmsProject.service.AssignmentService;
@@ -50,5 +49,10 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public void deleteAssignment(Integer id) {
         assignmentRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Assignment> getAssignmentsByCourseId(Integer courseId) {
+        return assignmentRepository.findByCourse_CourseId(courseId);
     }
 }

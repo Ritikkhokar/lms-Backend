@@ -9,4 +9,5 @@ public interface AssignmentService {
     Assignment createAssignment(Assignment assignment);
     Assignment updateAssignment(Integer id, Assignment assignment);
     void deleteAssignment(Integer id);
+    List<Assignment> getAssignmentsByCourseId(Integer courseId);
 }
