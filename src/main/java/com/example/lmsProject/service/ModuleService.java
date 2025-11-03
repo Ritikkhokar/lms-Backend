@@ -8,4 +8,5 @@ public interface ModuleService {
     Module createModule(Module module);
     Module updateModule(Integer id, Module module);
     void deleteModule(Integer id);
+    List<Module> getModulesByCourseId(Integer courseId);
 }

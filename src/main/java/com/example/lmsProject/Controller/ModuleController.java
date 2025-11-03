@@ -54,4 +54,9 @@ public class ModuleController {
         moduleService.deleteModule(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/getModulesByCourseId/{id}")
+    public ResponseEntity<List<Module>> getModulesByCourseId(@PathVariable Integer id){
+        return ResponseEntity.ok( moduleService.getModulesByCourseId(id));
+    }
 }

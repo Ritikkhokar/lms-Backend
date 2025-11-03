@@ -48,4 +48,9 @@ public class ModuleServiceImpl implements ModuleService {
     public void deleteModule(Integer id) {
         moduleRepository.deleteById(id);
     }
+
+    @Override
+    public List<Module> getModulesByCourseId(Integer courseId) {
+        return moduleRepository.findByCourse_CourseId(courseId);
+    }
 }
