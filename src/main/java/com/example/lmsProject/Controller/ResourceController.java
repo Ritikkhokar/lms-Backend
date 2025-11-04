@@ -1,5 +1,6 @@
 package com.example.lmsProject.Controller;
 
+import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.entity.Resource;
 import com.example.lmsProject.service.ResourceService;
 import org.slf4j.Logger;
@@ -53,5 +54,10 @@ public class ResourceController {
     public ResponseEntity<Void> deleteResource(@PathVariable Integer id) {
         resourceService.deleteResource(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/getResourcesByModuleId/{id}")
+    public ResponseEntity<List<Resource>> getResourcesByModuleId(@PathVariable Integer id){
+        return ResponseEntity.ok( resourceService.getResourcesByModuleId(id));
     }
 }

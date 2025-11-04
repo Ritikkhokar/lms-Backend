@@ -9,4 +9,5 @@ public interface ResourceService {
     Resource createResource(Resource resource);
     Resource updateResource(Integer id, Resource resource);
     void deleteResource(Integer id);
+    List<Resource> getResourcesByModuleId(Integer moduleId);
 }

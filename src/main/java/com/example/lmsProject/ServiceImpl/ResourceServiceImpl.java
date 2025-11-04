@@ -51,4 +51,9 @@ public class ResourceServiceImpl implements ResourceService {
     public void deleteResource(Integer id) {
         resourceRepository.deleteById(id);
     }
+
+    @Override
+    public List<Resource> getResourcesByModuleId(Integer moduleId) {
+        return resourceRepository.findByModule_moduleId(moduleId);
+    }
 }
