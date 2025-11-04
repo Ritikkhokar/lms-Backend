@@ -47,7 +47,7 @@ class BuildGradleDependenciesTest {
     // ---------- Umbrella tests (3 total) ----------
 
     @Test
-    @DisplayName("Plugins present in build.gradle (umbrella)")
+    @DisplayName("Plugins present in build.gradle")
     void pluginsPresent() {
         Map<String, String> checks = new LinkedHashMap<>();
         checks.put("SonarQube plugin",
@@ -62,7 +62,7 @@ class BuildGradleDependenciesTest {
     }
 
     @Test
-    @DisplayName("Dependencies present in build.gradle (umbrella)")
+    @DisplayName("Dependencies present in build.gradle")
     void dependenciesPresent() {
         Map<String, String> checks = new LinkedHashMap<>();
         // Starters
@@ -98,7 +98,7 @@ class BuildGradleDependenciesTest {
     }
 
     @Test
-    @DisplayName("Test task configuration present (umbrella)")
+    @DisplayName("Test task configuration present")
     void testTaskConfigured() {
         Map<String, String> checks = new LinkedHashMap<>();
         checks.put("JUnit Platform enabled in test task",
