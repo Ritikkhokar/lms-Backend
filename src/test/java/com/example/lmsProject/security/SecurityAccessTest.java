@@ -5,11 +5,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
-
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class SecurityAccessTest {
@@ -31,19 +29,19 @@ class SecurityAccessTest {
     void tamperedToken_isRejected() {
         String token = JwtUtil.generateToken("bob@example.com");
 
-        // Tamper the token (breaks the signature)
+
         String tampered = token + "x";
 
         assertFalse(JwtUtil.validateToken(tampered), "Tampered token must be invalid");
 
-        // Extracting should throw
+
         assertThrows(JwtException.class, () -> JwtUtil.extractUsername(tampered),
                 "Extracting from tampered token should fail");
     }
 
     @Test
     void tokenSignedWithDifferentSecret_isRejected() {
-        // Create a DIFFERENT secret/key than JwtUtil's internal static KEY
+
         SecretKey otherKey = Keys.hmacShaKeyFor(
                 "DIFFERENT-SECRET-STRING-THAN-UTIL-KEY-AT-LEAST-32-BYTES!".getBytes(StandardCharsets.UTF_8)
         );

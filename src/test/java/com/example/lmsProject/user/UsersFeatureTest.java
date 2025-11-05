@@ -1,7 +1,6 @@
 package com.example.lmsProject.user;
 
 
-
 import com.example.lmsProject.entity.User;           // <-- adjust if your package differs
 import com.example.lmsProject.dto.UserDto;        // <-- adjust if your package differs
 import com.example.lmsProject.Controller.UserController; // <-- adjust if your package differs
@@ -18,46 +17,38 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Single file covering:
- *  1) UserDto JSON contract (serialize/deserialize & expected keys)  [reuses your previous tests]
- *  2) UserController endpoint mapping checks (annotation inspection, no Spring context)
- *
- * Pure JUnit + Jackson + reflection. No MockMvc, no Spring Boot test context.
- */
+
 class UsersFeatureTest {
 
-    // --------------------------- JSON tests (UserDto) ---------------------------
+
     private final ObjectMapper om = new ObjectMapper();
 
     @Test
     void userDto_serializesAndDeserializes() throws Exception {
-        // Adjust field names that exist in your UserDto (id/userId, fullName/name, etc.)
-        // We'll build via reflection to avoid tight coupling.
+
         UserDto dto = new UserDto();
         Class<?> cls = dto.getClass();
 
-        // Candidates for common fields
-        List<String> ID       = Arrays.asList("Id", "UserId");
-        List<String> NAME     = Arrays.asList("FullName", "Name");
-        List<String> EMAIL    = Arrays.asList("Email");
-        List<String> ROLE     = Arrays.asList("Role", "RoleName");
 
-        // ---- Set what exists ----
+        List<String> ID = Arrays.asList("Id", "UserId");
+        List<String> NAME = Arrays.asList("FullName", "Name");
+        List<String> EMAIL = Arrays.asList("Email");
+        List<String> ROLE = Arrays.asList("Role", "RoleName");
+
+
         setIfPresent(cls, dto, ID, anyOf(Long.class, long.class, Integer.class, int.class, String.class), 101L, 101, "101");
         setIfPresent(cls, dto, NAME, String.class, "Prajwal Hulamani");
         setIfPresent(cls, dto, EMAIL, String.class, "prajwal@example.com");
         setIfPresent(cls, dto, ROLE, String.class, "STUDENT");
 
-        // round trip
+
         String json = om.writeValueAsString(dto);
         assertNotNull(json);
         assertTrue(json.startsWith("{"));
-
         UserDto back = om.readValue(json, UserDto.class);
         assertNotNull(back);
 
-        // verify what exists
+
         assertIfPresentEquals(cls, back, ID, 101L, 101, "101");
         assertIfPresentEquals(cls, back, NAME, "Prajwal Hulamani");
         assertIfPresentEquals(cls, back, EMAIL, "prajwal@example.com");
@@ -76,9 +67,10 @@ class UsersFeatureTest {
         setIfPresent(cls, dto, Arrays.asList("Role", "RoleName"), String.class, "TEACHER");
 
         String json = om.writeValueAsString(dto);
-        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String,Object>>(){});
+        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String, Object>>() {
+        });
 
-        // We don't know exact property names; accept common variants.
+
         assertTrue(
                 hasAnyKey(map, "id", "userId"),
                 "JSON should include 'id' or 'userId' key");
@@ -94,18 +86,19 @@ class UsersFeatureTest {
                 "JSON should include 'role' or 'roleName' if present in DTO");
     }
 
-    // ----------------------- Controller mapping tests (UserController) -----------------------
+    // Controller mapping tests
 
-    // Utility: extract value/path arrays from mapping annotations
     private static List<String> valuesFromMapping(Object mapping) {
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("value").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("path").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return List.of();
     }
 
@@ -124,7 +117,6 @@ class UsersFeatureTest {
         return (rm == null) ? List.of() : valuesFromMapping(rm);
     }
 
-    // IMPORTANT: treat present annotation with no explicit path as base ""
     private static <A extends Annotation> List<String> methodPaths(Method m, Class<A> annType) {
         A ann = m.getAnnotation(annType);
         if (ann == null) return List.of();
@@ -206,7 +198,6 @@ class UsersFeatureTest {
         assertTrue(found, "Expected a DELETE mapping with an '{id}' path variable for deleting a user.");
     }
 
-    // --------------------------- Reflection helpers (DTO) ---------------------------
 
     private static boolean hasAnyKey(Map<String, ?> map, String... keys) {
         for (String k : keys) {
@@ -238,7 +229,7 @@ class UsersFeatureTest {
                         // primitives case handling
                         if (t.isPrimitive()) {
                             if ((t == long.class && sv instanceof Long) ||
-                                    (t == int.class  && sv instanceof Integer)) {
+                                    (t == int.class && sv instanceof Integer)) {
                                 m.invoke(obj, sv);
                                 return;
                             }
@@ -264,7 +255,8 @@ class UsersFeatureTest {
                                 return;
                             }
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }
@@ -280,9 +272,9 @@ class UsersFeatureTest {
                 return;
             } catch (NoSuchMethodException ignored) {
             } catch (Exception e) {
-                // ignore; try next
+                System.out.println(e.getMessage());
             }
-            // try any single-arg setter with that name
+
             for (Method m : cls.getMethods()) {
                 if (m.getName().equals(setter) && m.getParameterCount() == 1) {
                     try {
@@ -291,7 +283,8 @@ class UsersFeatureTest {
                             m.invoke(obj, sample);
                             return;
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }
@@ -314,7 +307,7 @@ class UsersFeatureTest {
                 fail("Getter invocation failed for '" + name + "': " + e);
             }
         }
-        // no getter found: skip (DTO may not expose that field)
+
         System.out.println("[INFO] No getter found for " + candidates + "; skipping equality assertion.");
     }
 }

@@ -1,29 +1,29 @@
 package com.example.lmsProject.auth;
 
 
-import com.example.lmsProject.Controller.AuthController; // adjust if package differs
+import com.example.lmsProject.Controller.AuthController;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class AuthControllerMappingTest {
 
-    // ----- helpers -----
+
     private static List<String> valuesFromMapping(Object mapping) {
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("value").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("path").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return List.of();
     }
 
@@ -43,7 +43,6 @@ class AuthControllerMappingTest {
         return paths.stream().anyMatch(p -> p != null && p.contains(needle));
     }
 
-    // ----- tests -----
 
     @Test
     void controller_classHasBasePathContainingAuth_orMethodsDo() {
@@ -85,7 +84,6 @@ class AuthControllerMappingTest {
                     s != null && (s.toLowerCase().contains("register") || s.toLowerCase().contains("signup"))
             );
         });
-        // If you don't expose registration, it's okay to skip. Make it non-fatal if truly absent:
         if (!found) System.out.println("[INFO] No explicit register/signup endpoint; skipping hard assertion.");
         assertTrue(true);
     }

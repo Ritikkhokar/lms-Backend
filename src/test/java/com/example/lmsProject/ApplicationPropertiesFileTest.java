@@ -27,7 +27,6 @@ class ApplicationPropertiesFileTest {
     @Test
     void requiredKeysPresent() throws Exception {
         Properties p = loadProps();
-        // presence (non-null & non-blank)
         assertTrue(hasText(p.getProperty("spring.application.name")), "spring.application.name required");
         assertTrue(hasText(p.getProperty("spring.datasource.url")), "spring.datasource.url required");
         assertTrue(hasText(p.getProperty("spring.datasource.username")), "spring.datasource.username required");
@@ -44,22 +43,19 @@ class ApplicationPropertiesFileTest {
     void valuesAreAsExpectedForThisProject() throws Exception {
         Properties p = loadProps();
 
-        // exact matches (based on the values you shared)
-        assertEquals("lmsProject", p.getProperty("spring.application.name"));
 
+        assertEquals("lmsProject", p.getProperty("spring.application.name"));
         assertEquals("jdbc:mysql://localhost:3306/lms", p.getProperty("spring.datasource.url"));
         assertEquals("root", p.getProperty("spring.datasource.username"));
         assertEquals("root", p.getProperty("spring.datasource.password"));
-
         assertEquals("validate", p.getProperty("spring.jpa.hibernate.ddl-auto"));
         assertEquals("true", p.getProperty("spring.jpa.show-sql"));
         assertEquals("org.hibernate.dialect.MySQL8Dialect",
                 p.getProperty("spring.jpa.properties.hibernate.dialect"));
-
         assertEquals("INFO", p.getProperty("logging.level.root"));
         assertEquals("DEBUG", p.getProperty("logging.level.com.example.lmsProject"));
         assertEquals("INFO", p.getProperty("logging.level.org.springframework.web"));
-        // optional file logging key (commented out in your file) is not asserted
+
     }
 
     @Test

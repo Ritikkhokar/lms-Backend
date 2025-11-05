@@ -1,24 +1,21 @@
 package com.example.lmsProject.course;
 
-import com.example.lmsProject.entity.Course;           // <-- adjust if your package differs
-import com.example.lmsProject.Controller.CourseController; // <-- adjust if your package differs
-
+import com.example.lmsProject.entity.Course;
+import com.example.lmsProject.Controller.CourseController;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 
 class CoursesFeatureTest {
 
-    // --------------------------- JSON tests (Course) ---------------------------
+
     private final ObjectMapper om = new ObjectMapper();
 
     @Test
@@ -65,14 +62,14 @@ class CoursesFeatureTest {
 
         assertTrue(hasAnyKey(map, "id", "courseId"), "JSON should include 'id' or 'courseId'.");
         assertTrue(hasAnyKey(map, "title", "name"),   "JSON should include 'title' or 'name'.");
-        // description variants are optional—only assert if your model exposes them
+
         assertTrue(hasAnyKey(map, "description", "desc", "details") || true,
                 "JSON may include 'description'/'desc'/'details' if present in Course.");
     }
 
-    // ----------------------- Controller mapping tests (CourseController) -----------------------
 
-    // Utility: extract value/path arrays from mapping annotations
+
+
     private static List<String> valuesFromMapping(Object mapping) {
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("value").invoke(mapping);
@@ -100,7 +97,7 @@ class CoursesFeatureTest {
         return (rm == null) ? List.of() : valuesFromMapping(rm);
     }
 
-    // treat present annotation with no explicit path as base ""
+
     private static <A extends Annotation> List<String> methodPaths(Method m, Class<A> annType) {
         A ann = m.getAnnotation(annType);
         if (ann == null) return List.of();
@@ -182,7 +179,7 @@ class CoursesFeatureTest {
         assertTrue(found, "Expected a DELETE mapping with '{id}' for deleting a course.");
     }
 
-    // --------------------------- Reflection helpers (entity) ---------------------------
+
 
     private static boolean hasAnyKey(Map<String, ?> map, String... keys) {
         for (String k : keys) if (map.containsKey(k)) return true;
@@ -197,7 +194,7 @@ class CoursesFeatureTest {
                                      Class<?>[] preferredTypes, Object... sampleValues) {
         for (String name : candidates) {
             String setter = "set" + name;
-            // try preferred types first
+
             for (Class<?> t : preferredTypes) {
                 try {
                     Method m = cls.getMethod(setter, t);
@@ -213,10 +210,10 @@ class CoursesFeatureTest {
                     }
                 } catch (NoSuchMethodException ignored) {
                 } catch (Exception e) {
-                    // continue
+                    System.out.println(e.getMessage());
                 }
             }
-            // fall back: any single-arg setter with that name
+
             for (Method m : cls.getMethods()) {
                 if (m.getName().equals(setter) && m.getParameterCount() == 1) {
                     try {
@@ -247,9 +244,9 @@ class CoursesFeatureTest {
                 return;
             } catch (NoSuchMethodException ignored) {
             } catch (Exception e) {
-                // continue
+                System.out.println(e.getMessage());
             }
-            // fallback: any single-arg setter with that name
+
             for (Method m : cls.getMethods()) {
                 if (m.getName().equals(setter) && m.getParameterCount() == 1) {
                     try {
@@ -271,7 +268,7 @@ class CoursesFeatureTest {
                 g.setAccessible(true);
                 Object actual = g.invoke(obj);
                 for (Object exp : expectedOptions) {
-                    if (Objects.equals(actual, exp)) return; // success
+                    if (Objects.equals(actual, exp)) return;
                 }
                 assertEquals(expectedOptions[0], actual, "Field '" + name + "' should equal one of expected values.");
                 return;
@@ -280,7 +277,7 @@ class CoursesFeatureTest {
                 fail("Getter invocation failed for '" + name + "': " + e);
             }
         }
-        // no getter: skip (entity may not expose that field)
+
         System.out.println("[INFO] No getter found for " + candidates + "; skipping equality assertion.");
     }
 }

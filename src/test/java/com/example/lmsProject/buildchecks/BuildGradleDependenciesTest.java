@@ -3,13 +3,11 @@ package com.example.lmsProject.buildchecks;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class BuildGradleDependenciesTest {
@@ -23,7 +21,6 @@ class BuildGradleDependenciesTest {
         gradle = Files.readString(p);
     }
 
-    // ---------- Helpers ----------
 
     private static void assertGroup(String groupName, Map<String, String> descriptionToRegex) {
         StringBuilder failures = new StringBuilder();
@@ -44,7 +41,6 @@ class BuildGradleDependenciesTest {
         }
     }
 
-    // ---------- Umbrella tests (3 total) ----------
 
     @Test
     @DisplayName("Plugins present in build.gradle")

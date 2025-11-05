@@ -2,16 +2,13 @@ package com.example.lmsProject.resource;
 
 import com.example.lmsProject.Controller.ResourceController;
 import com.example.lmsProject.entity.Resource;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
@@ -85,11 +82,12 @@ class ResourcesFeatureTest {
 
 
         setIfPresent(r.getClass(), r, List.of(
-                "Url","Link","Path","FileUrl","ResourceUrl","FilePath","DownloadUrl","Location"
+                "Url", "Link", "Path", "FileUrl", "ResourceUrl", "FilePath", "DownloadUrl", "Location"
         ), anyOf(String.class), "/files/syllabus.pdf");
 
         String json = om.writeValueAsString(r);
-        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String, Object>>() {
+        });
 
 
         assertTrue(hasAnyKey(map, "resourceId", "id"),
@@ -99,11 +97,11 @@ class ResourcesFeatureTest {
 
 
         boolean urlGetterExists = hasAnyGetter(r.getClass(), List.of(
-                "getUrl","getLink","getPath","getFileUrl","getResourceUrl","getFilePath","getDownloadUrl","getLocation"
+                "getUrl", "getLink", "getPath", "getFileUrl", "getResourceUrl", "getFilePath", "getDownloadUrl", "getLocation"
         ));
 
         if (urlGetterExists) {
-            assertTrue(hasAnyKey(map, "url","link","path","fileUrl","resourceUrl","filePath","downloadUrl","location"),
+            assertTrue(hasAnyKey(map, "url", "link", "path", "fileUrl", "resourceUrl", "filePath", "downloadUrl", "location"),
                     "JSON should include a url/link/path-like field.");
         } else {
             System.out.println("[INFO] Resource has no URL-like getter; skipping strict URL key assertion.");
@@ -111,11 +109,10 @@ class ResourcesFeatureTest {
         }
 
 
-        assertTrue(hasAnyKey(map, "description","desc") || true, "description may be present");
-        assertTrue(hasAnyKey(map, "type","contentType","resourceType") || true, "type may be present");
-        assertTrue(hasAnyKey(map, "createdAt","createdOn","createdDate") || true, "timestamp may be present");
+        assertTrue(hasAnyKey(map, "description", "desc") || true, "description may be present");
+        assertTrue(hasAnyKey(map, "type", "contentType", "resourceType") || true, "type may be present");
+        assertTrue(hasAnyKey(map, "createdAt", "createdOn", "createdDate") || true, "timestamp may be present");
     }
-
 
 
     @Test
@@ -192,16 +189,17 @@ class ResourcesFeatureTest {
     }
 
 
-
     private static List<String> valuesFromMapping(Object mapping) {
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("value").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("path").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return List.of();
     }
 
@@ -237,12 +235,15 @@ class ResourcesFeatureTest {
             try {
                 Method m = cls.getMethod(g);
                 if (m.getParameterCount() == 0) return true;
-            } catch (NoSuchMethodException ignored) {}
+            } catch (NoSuchMethodException ignored) {
+            }
         }
         return false;
     }
 
-    private static Class<?>[] anyOf(Class<?>... types) { return types; }
+    private static Class<?>[] anyOf(Class<?>... types) {
+        return types;
+    }
 
     private static void setIfPresent(Class<?> cls, Object obj, List<String> candidates,
                                      Class<?>[] preferredTypes, Object... sampleValues) {
@@ -282,7 +283,8 @@ class ResourcesFeatureTest {
                                 return;
                             }
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }
@@ -308,7 +310,8 @@ class ResourcesFeatureTest {
                             m.invoke(obj, sample);
                             return;
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }

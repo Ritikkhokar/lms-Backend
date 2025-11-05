@@ -1,41 +1,31 @@
 package com.example.lmsProject.role;
 
-import com.example.lmsProject.entity.Role;           // <-- adjust if your package differs
-import com.example.lmsProject.Controller.RoleController; // <-- adjust if your package differs
-
+import com.example.lmsProject.entity.Role;
+import com.example.lmsProject.Controller.RoleController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Single test file covering:
- *  1) Role model/DTO JSON contract (getters/setters + Jackson round-trip).
- *  2) RoleController endpoint mappings (annotation inspection).
- *
- * No Spring context is started; everything uses reflection & Jackson only.
- */
+
 class RolesFeatureTest {
 
-    // ---------------------------------------------------------------------
-    // Jackson for DTO/Entity JSON tests
-    // ---------------------------------------------------------------------
+
     private final ObjectMapper om = new ObjectMapper();
 
-    // ---- Helpers for Role reflection (field-name variants) ----
+
     private Optional<Method> findGetter(Class<?> cls, List<String> candidates) {
         for (String name : candidates) {
             try {
                 Method m = cls.getMethod("get" + name);
                 m.setAccessible(true);
                 return Optional.of(m);
-            } catch (NoSuchMethodException ignored) {}
+            } catch (NoSuchMethodException ignored) {
+            }
         }
         return Optional.empty();
     }
@@ -43,15 +33,15 @@ class RolesFeatureTest {
     private Optional<Method> findSetter(Class<?> cls, List<String> candidates, Class<?>... preferredTypes) {
         for (String name : candidates) {
             String setter = "set" + name;
-            // Try preferred types first
             for (Class<?> t : preferredTypes) {
                 try {
                     Method m = cls.getMethod(setter, t);
                     m.setAccessible(true);
                     return Optional.of(m);
-                } catch (NoSuchMethodException ignored) {}
+                } catch (NoSuchMethodException ignored) {
+                }
             }
-            // Then any single-arg setter with that name
+
             for (Method m : cls.getMethods()) {
                 if (m.getName().equals(setter) && m.getParameterCount() == 1) {
                     m.setAccessible(true);
@@ -62,21 +52,18 @@ class RolesFeatureTest {
         return Optional.empty();
     }
 
-    // ---------------------------------------------------------------------
-    // Role model/DTO tests (plain JUnit + Jackson)
-    // ---------------------------------------------------------------------
 
     @Test
     void role_gettersAndSetters_work_withCommonVariants() {
         Role r = new Role();
         Class<?> cls = r.getClass();
 
-        // Candidate property names
-        List<String> ID   = Arrays.asList("Id", "RoleId");
+
+        List<String> ID = Arrays.asList("Id", "RoleId");
         List<String> NAME = Arrays.asList("Name", "RoleName");
         List<String> DESC = Arrays.asList("Description", "Desc");
 
-        // ID
+
         Optional<Method> setId = findSetter(cls, ID, Long.class, long.class, Integer.class, int.class, String.class);
         Optional<Method> getId = findGetter(cls, ID);
         Object expectedId = null;
@@ -96,7 +83,7 @@ class RolesFeatureTest {
             System.out.println("[INFO] No ID/RoleId property found; skipping ID assertion.");
         }
 
-        // NAME
+
         Optional<Method> setName = findSetter(cls, NAME, String.class);
         Optional<Method> getName = findGetter(cls, NAME);
         if (setName.isPresent() && getName.isPresent()) {
@@ -111,7 +98,7 @@ class RolesFeatureTest {
             System.out.println("[INFO] No Name/RoleName property found; skipping name assertion.");
         }
 
-        // DESC
+
         Optional<Method> setDesc = findSetter(cls, DESC, String.class);
         Optional<Method> getDesc = findGetter(cls, DESC);
         if (setDesc.isPresent() && getDesc.isPresent()) {
@@ -132,11 +119,11 @@ class RolesFeatureTest {
         Role r = new Role();
         Class<?> cls = r.getClass();
 
-        List<String> ID   = Arrays.asList("Id", "RoleId");
+        List<String> ID = Arrays.asList("Id", "RoleId");
         List<String> NAME = Arrays.asList("Name", "RoleName");
         List<String> DESC = Arrays.asList("Description", "Desc");
 
-        // set present fields
+
         Object expectedId = null;
         Optional<Method> setId = findSetter(cls, ID, Long.class, long.class, Integer.class, int.class, String.class);
         if (setId.isPresent()) {
@@ -161,7 +148,7 @@ class RolesFeatureTest {
             setDesc.get().invoke(r, expectedDesc);
         }
 
-        // JSON round-trip
+
         String json = om.writeValueAsString(r);
         assertNotNull(json);
         assertTrue(json.startsWith("{"));
@@ -169,7 +156,7 @@ class RolesFeatureTest {
         Role back = om.readValue(json, Role.class);
         assertNotNull(back);
 
-        // verify present fields
+
         Optional<Method> getId = findGetter(cls, ID);
         if (getId.isPresent() && expectedId != null) {
             Object actualId = getId.get().invoke(back);
@@ -189,20 +176,18 @@ class RolesFeatureTest {
         }
     }
 
-    // ---------------------------------------------------------------------
-    // RoleController mapping tests (annotation inspection only)
-    // ---------------------------------------------------------------------
 
-    // Mapping helpers
     private static List<String> valuesFromMapping(Object mapping) {
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("value").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("path").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return List.of();
     }
 
@@ -211,7 +196,7 @@ class RolesFeatureTest {
     }
 
     private static boolean anyPathMatchesIdLike(Collection<String> paths) {
-        // looks for "{id}" (case-insensitive) or any path variable
+
         return paths.stream().anyMatch(p ->
                 p != null && (p.matches(".*\\{(?i:id)\\}.*") || p.matches(".*\\{[^/]+\\}.*"))
         );
@@ -222,8 +207,7 @@ class RolesFeatureTest {
         return (rm == null) ? List.of() : valuesFromMapping(rm);
     }
 
-    // FIXED: if a mapping annotation is present with no explicit value/path,
-    // treat it as mapping to the base path ("")
+
     private static <A extends Annotation> List<String> methodPaths(Method m, Class<A> annType) {
         A ann = m.getAnnotation(annType);
         if (ann == null) return List.of();
@@ -254,8 +238,8 @@ class RolesFeatureTest {
         Class<?> c = RoleController.class;
         boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
             List<String> p = methodPaths(m, GetMapping.class);
-            if (p.isEmpty()) return false; // not a GET method
-            // ok if it's "", "/" (with class base) OR contains "roles"
+            if (p.isEmpty()) return false;
+
             return p.stream().anyMatch(s ->
                     s == null || s.isEmpty() || "/".equals(s) || s.contains("roles")
             );

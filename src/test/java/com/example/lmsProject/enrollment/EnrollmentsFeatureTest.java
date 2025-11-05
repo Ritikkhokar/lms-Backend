@@ -1,12 +1,10 @@
 package com.example.lmsProject.enrollment;
 
-// Adjust these if your packages differ:
+
 import com.example.lmsProject.entity.Enrollment;
 import com.example.lmsProject.entity.User;
 import com.example.lmsProject.entity.Course;
-// If your controller is in a different package, fix this import:
 import com.example.lmsProject.Controller.EnrollmentController;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,13 +12,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnrollmentsFeatureTest {
@@ -28,24 +24,21 @@ class EnrollmentsFeatureTest {
     private final ObjectMapper om = new ObjectMapper();
 
 
-
-
-
     @Test
     void enrollment_enrolledAt_serializesAndDeserializes_withJavaTimeModule() throws Exception {
-        // Arrange: Enrollment with a stable (nanosecond-truncated) timestamp
+
         com.example.lmsProject.entity.Enrollment e = new com.example.lmsProject.entity.Enrollment();
         e.setEnrollmentId(123); // Lombok setter exists for Integer field
         LocalDateTime now = LocalDateTime.of(2025, 1, 1, 10, 30, 0).withNano(0);
         e.setEnrolledAt(now);
 
-        // ObjectMapper configured to handle Java 8 date/time
+
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(MapperFeature.REQUIRE_HANDLERS_FOR_JAVA8_TIMES);
 
-        // Act: serialize then deserialize
+
         String json = mapper.writeValueAsString(e);
         assertNotNull(json, "JSON should not be null");
         assertTrue(json.contains("\"enrolledAt\""), "JSON should include 'enrolledAt' field");
@@ -53,7 +46,7 @@ class EnrollmentsFeatureTest {
         com.example.lmsProject.entity.Enrollment back =
                 mapper.readValue(json, com.example.lmsProject.entity.Enrollment.class);
 
-        // Assert: round-trip preserved the timestamp
+
         assertNotNull(back.getEnrolledAt(), "Deserialized enrolledAt should not be null");
         assertEquals(now, back.getEnrolledAt(), "Deserialized enrolledAt should match the original value");
     }
@@ -63,7 +56,7 @@ class EnrollmentsFeatureTest {
         Enrollment e = new Enrollment();
         Class<?> cls = e.getClass();
 
-        // Ensure nested objects are non-null so keys appear in JSON
+
         User student = new User();
         setIfPresent(student.getClass(), student,
                 Arrays.asList("UserId", "Id"),
@@ -76,19 +69,20 @@ class EnrollmentsFeatureTest {
                 anyOf(Integer.class, int.class, Long.class, long.class, String.class),
                 707, 707L, "707");
 
-        // Attach them
+
         setIfPresent(cls, e, Arrays.asList("Student", "User", "Learner"), User.class, student);
         setIfPresent(cls, e, Arrays.asList("Course", "Clazz"), Course.class, course);
 
-        // enrollmentId (to check id key exists too)
+
         setIfPresent(cls, e, Arrays.asList("EnrollmentId", "Id"),
                 anyOf(Integer.class, int.class, Long.class, long.class, String.class),
                 7, 7L, "7");
 
         String json = om.writeValueAsString(e);
-        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String,Object>>(){});
+        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String, Object>>() {
+        });
 
-        // EXPECTATIONS for your entity structure:
+
         assertTrue(hasAnyKey(map, "enrollmentId", "id"),
                 "JSON should include 'enrollmentId' or 'id'.");
         assertTrue(map.containsKey("student"),
@@ -96,24 +90,25 @@ class EnrollmentsFeatureTest {
         assertTrue(map.containsKey("course"),
                 "JSON should include 'course' (object), since Enrollment has a Course reference.");
 
-        // Optional fields (don’t hard fail if absent)
+
         assertTrue(hasAnyKey(map, "enrolledAt", "createdAt", "createdOn", "createdDate") || true,
                 "Created/Enrolled timestamp may be present if mapped.");
         assertTrue(hasAnyKey(map, "enrolledBy") || true,
                 "enrolledBy may be present if your model exposes it.");
     }
 
-    // ----------------------- Controller mapping tests (EnrollmentController) -----------------------
 
     private static List<String> valuesFromMapping(Object mapping) {
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("value").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
             String[] arr = (String[]) mapping.getClass().getMethod("path").invoke(mapping);
             if (arr != null && arr.length > 0) return Arrays.asList(arr);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return List.of();
     }
 
@@ -225,7 +220,6 @@ class EnrollmentsFeatureTest {
         assertTrue(true);
     }
 
-    // --------------------------- Reflection helpers ---------------------------
 
     private static boolean hasAnyKey(Map<String, ?> map, String... keys) {
         for (String k : keys) if (map.containsKey(k)) return true;
@@ -240,7 +234,7 @@ class EnrollmentsFeatureTest {
                                      Class<?>[] preferredTypes, Object... sampleValues) {
         for (String name : candidates) {
             String setter = "set" + name;
-            // preferred types first
+
             for (Class<?> t : preferredTypes) {
                 try {
                     Method m = cls.getMethod(setter, t);
@@ -259,7 +253,7 @@ class EnrollmentsFeatureTest {
                     // continue
                 }
             }
-            // fallback: any single-arg setter with that name
+
             for (Method m : cls.getMethods()) {
                 if (m.getName().equals(setter) && m.getParameterCount() == 1) {
                     try {
@@ -274,7 +268,8 @@ class EnrollmentsFeatureTest {
                                 return;
                             }
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }
@@ -290,7 +285,7 @@ class EnrollmentsFeatureTest {
                 return;
             } catch (NoSuchMethodException ignored) {
             } catch (Exception e) {
-                // continue
+                System.out.println(e.getMessage());
             }
             for (Method m : cls.getMethods()) {
                 if (m.getName().equals(setter) && m.getParameterCount() == 1) {
@@ -300,7 +295,8 @@ class EnrollmentsFeatureTest {
                             m.invoke(obj, sample);
                             return;
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }

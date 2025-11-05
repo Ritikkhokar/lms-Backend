@@ -14,18 +14,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-// extra imports for the port-check class below
+
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * PART 1: Minimal Spring context tests (no DB, no web) – fast & deterministic.
- */
+
 @SpringBootTest(
-		classes = LmsProjectApplicationTests.EmptyTestApp.class, // minimal app, not your real beans
+		classes = LmsProjectApplicationTests.EmptyTestApp.class,
 		webEnvironment = SpringBootTest.WebEnvironment.NONE,
 		properties = {
 				"spring.main.banner-mode=off",
@@ -34,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 )
 class LmsProjectApplicationTests {
 
-	// Minimal empty Boot app for framework-boot smoke testing
+
 	@SpringBootApplication
 	static class EmptyTestApp { }
 
@@ -46,7 +44,7 @@ class LmsProjectApplicationTests {
 		assertNotNull(context, "Spring should bootstrap a minimal context");
 	}
 
-	// ---- Added per your request ----
+
 	@Test
 	void hasSpringBootApplicationAnnotation() {
 		assertTrue(
@@ -55,17 +53,17 @@ class LmsProjectApplicationTests {
 		);
 	}
 
-	// ---- Added per your request (combined contract check) ----
+
 	@Test
 	void mainMethod_contract() throws Exception {
-		// existence
+
 		Method m = LmsProjectApplication.class.getDeclaredMethod("main", String[].class);
 		assertNotNull(m, "main(String[] args) should exist");
-		// return type
+
 		assertEquals(void.class, m.getReturnType(), "main should return void");
-		// visibility
+
 		assertTrue(Modifier.isPublic(m.getModifiers()), "main should be public");
-		// static
+
 		assertTrue(Modifier.isStatic(m.getModifiers()), "main should be static");
 	}
 
@@ -75,16 +73,13 @@ class LmsProjectApplicationTests {
 		app.setBannerMode(Banner.Mode.OFF);
 		app.setWebApplicationType(WebApplicationType.NONE);
 		assertDoesNotThrow(() -> {
-			var ctx = app.run(); // start
-			ctx.close();         // close cleanly
+			var ctx = app.run();
+			ctx.close();
 		});
 	}
 }
 
-/**
- * PART 2: Port check – spins up a tiny isolated web app on a RANDOM_PORT (no real repos/controllers).
- * This is integration-style but still avoids your real app beans & DB.
- */
+
 @SpringBootTest(
 		classes = PortCheckTest.EmptyWebApp.class,                 // tiny web app just for this test
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
