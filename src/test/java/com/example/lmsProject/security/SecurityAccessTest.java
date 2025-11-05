@@ -36,7 +36,7 @@ class SecurityAccessTest {
 
         assertFalse(JwtUtil.validateToken(tampered), "Tampered token must be invalid");
 
-        // Optional: extracting should throw
+        // Extracting should throw
         assertThrows(JwtException.class, () -> JwtUtil.extractUsername(tampered),
                 "Extracting from tampered token should fail");
     }
@@ -62,7 +62,7 @@ class SecurityAccessTest {
         assertFalse(JwtUtil.validateToken(foreignToken),
                 "Token signed with a different secret must be invalid for JwtUtil");
 
-        // Optional: extracting should throw, since signature verification fails
+        // Extracting should throw, since signature verification fails
         assertThrows(JwtException.class, () -> JwtUtil.extractUsername(foreignToken),
                 "Extracting from a token signed with a different secret should fail");
     }
