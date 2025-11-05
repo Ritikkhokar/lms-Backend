@@ -1,6 +1,7 @@
 package com.example.lmsProject.ServiceImpl;
 import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.UserRepository;
+import com.example.lmsProject.dto.UserDto;
 import com.example.lmsProject.entity.User;
 import com.example.lmsProject.service.UserService;
 import org.slf4j.Logger;
@@ -54,5 +55,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public UserDto convertUserToUserDto(User user) {
+        return new UserDto(user.getUserId(), user.getFullName(),user.getEmail(), user.getRole().getRoleName());
     }
 }

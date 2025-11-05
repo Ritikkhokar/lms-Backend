@@ -9,4 +9,5 @@ public interface EnrollmentService {
     Enrollment createEnrollment(Enrollment enrollment);
     Enrollment updateEnrollment(Integer id, Enrollment enrollment);
     void deleteEnrollment(Integer id);
+    List<Enrollment> getAllEnrollmentsByCourseId(Integer courseId);
 }

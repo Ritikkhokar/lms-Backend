@@ -1,5 +1,6 @@
 package com.example.lmsProject.Controller;
 
+import com.example.lmsProject.dto.AverageMarks;
 import com.example.lmsProject.entity.Submission;
 import com.example.lmsProject.service.SubmissionService;
 import org.slf4j.Logger;
@@ -53,5 +54,11 @@ public class SubmissionController {
     public ResponseEntity<Void> deleteSubmission(@PathVariable Integer id) {
         submissionService.deleteSubmission(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("averageGradesOfStudentsInACourse/{id}")
+    public ResponseEntity<List<AverageMarks>> averageGradesOfStudentsInACourse(@PathVariable Integer id) {
+        List<AverageMarks> averageGradesOfStudentsInACourse = submissionService.averageGradeOfEachStudentInACourse(id);
+        return ResponseEntity.ok(averageGradesOfStudentsInACourse);
     }
 }
