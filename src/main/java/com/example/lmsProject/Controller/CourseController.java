@@ -64,8 +64,9 @@ public class CourseController {
 
     @GetMapping("/coursePerformanceByCourseId/{id}/{threshold}")
     public ResponseEntity<CoursePerformance> coursePerformanceByCourseId(
-            @PathVariable Integer id, @RequestBody Integer threshold
+            @PathVariable Integer id, @PathVariable Integer threshold
     ){
-        return ResponseEntity.ok( courseService.getCoursePerformance(id, threshold));
+        return ResponseEntity.ok(courseService.getCoursePerformance(id, threshold));
     }
+
 }
