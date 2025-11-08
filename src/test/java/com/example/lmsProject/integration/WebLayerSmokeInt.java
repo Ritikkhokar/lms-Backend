@@ -27,20 +27,16 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Standalone MockMvc tests (no Spring context).
- * Matches your actual controllers:
- *  - POST /api/auth/login  (AuthController)
- *  - POST /api/users       (UserController)
- *  - GET  /api/roles       (RoleController)
- */
+
 @ExtendWith(MockitoExtension.class)
 class WebLayerSmokeInt {
 
     private MockMvc mvc;
 
-    @Mock private UserService userService;
-    @Mock private RoleService roleService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private RoleService roleService;
 
     private AuthController authController;
     private UserController userController;
@@ -57,7 +53,6 @@ class WebLayerSmokeInt {
                 .build();
     }
 
-    // ---------- Test 1: Auth login returns token + user ----------
     @Test
     void auth_login_ok_returnsTokenAndUser() throws Exception {
         var role = new Role();
@@ -68,27 +63,27 @@ class WebLayerSmokeInt {
         userEntity.setUserId(1001);
         userEntity.setFullName("Admin One");
         userEntity.setEmail("admin@test.edu");
-        userEntity.setPasswordHash("Admin@123");  // plaintext compare in your controller
+        userEntity.setPasswordHash("Admin@123");
         userEntity.setRole(role);
         userEntity.setCreatedAt(LocalDateTime.now());
 
-        // AuthController uses userService.findByEmail(...)
+
         when(userService.findByEmail(eq("admin@test.edu"))).thenReturn(userEntity);
 
         mvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-              {"email":"admin@test.edu","password":"Admin@123"}
-            """))
+                                  {"email":"admin@test.edu","password":"Admin@123"}
+                                """))
                 .andExpect(status().isOk())
-                // token is generated via JwtUtil.generateToken(...) statically; just assert it's present
+
                 .andExpect(jsonPath("$.token").isString())
                 .andExpect(jsonPath("$.user.userId").value(1001))
                 .andExpect(jsonPath("$.user.email").value("admin@test.edu"))
                 .andExpect(jsonPath("$.user.roleName").value("Admin"));
     }
 
-    // ---------- Test 2: Create user returns entity (201 Created) ----------
+
     @Test
     void users_create_ok_returnsUserEntity() throws Exception {
         var teacherRole = new Role();
@@ -108,8 +103,8 @@ class WebLayerSmokeInt {
         mvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-              {"fullName":"Priya Sharma","email":"priya.teacher@example.com","passwordHash":"Teach@123","role":{"roleId":2}}
-            """))
+                                  {"fullName":"Priya Sharma","email":"priya.teacher@example.com","passwordHash":"Teach@123","role":{"roleId":2}}
+                                """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userId").value(2002))
                 .andExpect(jsonPath("$.email").value("priya.teacher@example.com"))
@@ -117,12 +112,18 @@ class WebLayerSmokeInt {
                 .andExpect(jsonPath("$.role.roleName").value("Teacher"));
     }
 
-    // ---------- Test 3: List roles returns array ----------
+
     @Test
     void roles_list_ok_returnsArray() throws Exception {
-        var r1 = new Role(); r1.setRoleId(1); r1.setRoleName("Admin");
-        var r2 = new Role(); r2.setRoleId(2); r2.setRoleName("Teacher");
-        var r3 = new Role(); r3.setRoleId(3); r3.setRoleName("Student");
+        var r1 = new Role();
+        r1.setRoleId(1);
+        r1.setRoleName("Admin");
+        var r2 = new Role();
+        r2.setRoleId(2);
+        r2.setRoleName("Teacher");
+        var r3 = new Role();
+        r3.setRoleId(3);
+        r3.setRoleName("Student");
 
         when(roleService.getAllRoles()).thenReturn(List.of(r1, r2, r3));
 
