@@ -33,5 +33,11 @@ public class Submission {
     @Column(precision = 5, scale = 2)
     private BigDecimal grade;
 
+    @Column(precision = 5, scale = 2)
+    private BigDecimal maximumGrade;
+
+    @Column(name = "is_graded")
+    private Boolean is_graded = false;
+
     private String feedback;
 }

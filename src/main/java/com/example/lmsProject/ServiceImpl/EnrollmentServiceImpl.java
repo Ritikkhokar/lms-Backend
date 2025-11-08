@@ -50,4 +50,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public void deleteEnrollment(Integer id) {
         enrollmentRepository.deleteById(id);
     }
+
+    @Override
+    public List<Enrollment> getAllEnrollmentsByCourseId(Integer courseId) {
+        return enrollmentRepository.findByCourse_CourseId(courseId);
+    }
 }

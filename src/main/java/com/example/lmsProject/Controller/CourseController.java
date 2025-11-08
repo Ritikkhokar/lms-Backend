@@ -1,5 +1,6 @@
 package com.example.lmsProject.Controller;
 
+import com.example.lmsProject.dto.CoursePerformance;
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.service.CourseService;
 import org.slf4j.Logger;
@@ -60,4 +61,12 @@ public class CourseController {
     public ResponseEntity<List<Course>> getCoursesByUserId(@PathVariable Integer id){
        return ResponseEntity.ok( courseService.getCoursesByUserId(id));
     }
+
+    @GetMapping("/coursePerformanceByCourseId/{id}/{threshold}")
+    public ResponseEntity<CoursePerformance> coursePerformanceByCourseId(
+            @PathVariable Integer id, @PathVariable Integer threshold
+    ){
+        return ResponseEntity.ok(courseService.getCoursePerformance(id, threshold));
+    }
+
 }
