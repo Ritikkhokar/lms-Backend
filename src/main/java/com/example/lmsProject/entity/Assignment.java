@@ -26,8 +26,8 @@ public class Assignment {
 
     private LocalDate dueDate;
 
-    @Column(name = "file_url")
-    private String fileUrl;
+    @Column(name = "file_key")
+    private String fileKey;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
