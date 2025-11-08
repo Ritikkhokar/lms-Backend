@@ -44,7 +44,7 @@ public class AssignmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Assignment> updateAssignment(@PathVariable Integer id, @RequestBody AssignmentDto assignment) {
+    public ResponseEntity<Assignment> updateAssignment(@PathVariable Integer id, @ModelAttribute AssignmentDto assignment) {
         Assignment updated = assignmentService.updateAssignment(id, assignment);
         if (updated == null) {
             return ResponseEntity.notFound().build();
