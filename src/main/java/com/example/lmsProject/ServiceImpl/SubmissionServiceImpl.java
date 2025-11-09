@@ -1,16 +1,15 @@
 package com.example.lmsProject.ServiceImpl;
 
 import com.example.lmsProject.Repository.SubmissionRepository;
-import com.example.lmsProject.dto.AssignmentDto;
 import com.example.lmsProject.dto.SubmissionDto;
 import com.example.lmsProject.entity.*;
 import com.example.lmsProject.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -93,6 +92,16 @@ public class SubmissionServiceImpl implements SubmissionService {
         }).orElse(null);
     }
 
+    @Override
+    public Submission updateSubmissionForTeacher(Integer id, SubmissionDto submissionDto) {
+        return submissionRepository.findById(id).map(existing -> {
+            existing.setIs_graded(Boolean.TRUE);
+            existing.setMaximumGrade(BigDecimal.valueOf(100));
+            existing.setFeedback(submissionDto.getFeedback());
+            existing.setGrade(submissionDto.getGrades());
+            return submissionRepository.save(existing);
+        }).orElse(null);
+    }
 
     @Override
     public void deleteSubmission(Integer id) {

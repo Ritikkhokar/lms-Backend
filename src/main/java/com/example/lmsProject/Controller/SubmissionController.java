@@ -54,6 +54,15 @@ public class SubmissionController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/forTeacher/{id}")
+    public ResponseEntity<Submission> updateSubmissionForTeacher(@PathVariable Integer id, @ModelAttribute SubmissionDto dto) {
+        Submission updated = submissionService.updateSubmissionForTeacher(id, dto);
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updated);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSubmission(@PathVariable Integer id) {
         submissionService.deleteSubmission(id);

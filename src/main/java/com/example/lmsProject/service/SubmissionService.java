@@ -12,6 +12,7 @@ public interface SubmissionService {
     Submission getSubmissionById(Integer id);
     Submission createSubmission(SubmissionDto submissionDto) throws IOException;
     Submission updateSubmissionForStudent(Integer id, SubmissionDto submissionDto);
+    Submission updateSubmissionForTeacher(Integer id, SubmissionDto submissionDto);
     void deleteSubmission(Integer id);
     List<Submission> getAllSubmissionsByUserId(Integer userId);
 }
