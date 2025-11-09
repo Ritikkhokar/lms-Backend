@@ -45,9 +45,9 @@ public class SubmissionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Submission> updateSubmission(@PathVariable Integer id, @RequestBody Submission submission) {
-        Submission updated = submissionService.updateSubmission(id, submission);
+    @PutMapping("/forStudent/{id}")
+    public ResponseEntity<Submission> updateSubmissionForStudent(@PathVariable Integer id, @ModelAttribute SubmissionDto dto) {
+        Submission updated = submissionService.updateSubmissionForStudent(id, dto);
         if (updated == null) {
             return ResponseEntity.notFound().build();
         }

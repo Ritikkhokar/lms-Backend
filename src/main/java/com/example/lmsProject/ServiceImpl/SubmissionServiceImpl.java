@@ -1,12 +1,14 @@
 package com.example.lmsProject.ServiceImpl;
 
 import com.example.lmsProject.Repository.SubmissionRepository;
+import com.example.lmsProject.dto.AssignmentDto;
 import com.example.lmsProject.dto.SubmissionDto;
 import com.example.lmsProject.entity.*;
 import com.example.lmsProject.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -70,17 +72,27 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public Submission updateSubmission(Integer id, Submission submission) {
+    public Submission updateSubmissionForStudent(Integer id, SubmissionDto submissionDto) {
         return submissionRepository.findById(id).map(existing -> {
-            existing.setAssignment(submission.getAssignment());
-            existing.setStudent(submission.getStudent());
-            existing.setSubmissionUrl(submission.getSubmissionUrl());
-            existing.setSubmittedAt(submission.getSubmittedAt());
-            existing.setGrade(submission.getGrade());
-            existing.setFeedback(submission.getFeedback());
+            String key = "submissions/" + submissionDto.getUserId() + "/" + submissionDto.getAssignmentId() + "/"
+                    + System.currentTimeMillis() + "_" + submissionDto.getFile().getOriginalFilename();
+            String s3Key = null;
+            try {
+                s3Key = storageService.uploadFile(
+                        key,
+                        submissionDto.getFile().getInputStream(),
+                        submissionDto.getFile().getSize(),
+                        submissionDto.getFile().getContentType()
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            existing.setSubmissionUrl(s3Key);
+            existing.setSubmittedAt(LocalDateTime.now());
             return submissionRepository.save(existing);
         }).orElse(null);
     }
+
 
     @Override
     public void deleteSubmission(Integer id) {
