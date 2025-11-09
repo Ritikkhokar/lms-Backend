@@ -1,3 +1,15 @@
 package com.example.lmsProject.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
-public record RecoResponse(java.util.List<RecoItem> items) {}
+
+/** Response for POST /api/reco/from-concepts */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RecoResponse {
+    private List<RecoItem> items;
+}

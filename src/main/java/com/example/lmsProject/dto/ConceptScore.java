@@ -1,3 +1,13 @@
 package com.example.lmsProject.dto;
 
-public record ConceptScore(String concept, Integer score) {}
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ConceptScore {
+    private String concept;
+    private Integer score;
+}

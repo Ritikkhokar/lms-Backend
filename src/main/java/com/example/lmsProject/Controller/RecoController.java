@@ -8,12 +8,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/reco")
 public class RecoController {
-    private final RecoService service;
-    public RecoController(RecoService service) { this.service = service; }
+
+    private final RecoService recoService;
+
+    public RecoController(RecoService recoService) {
+        this.recoService = recoService;
+    }
 
     @PostMapping("/from-concepts")
     public RecoResponse fromConcepts(@RequestBody FromConceptsRequest req) {
-        int topN = (req.topN() == null || req.topN() <= 0) ? 5 : req.topN();
-        return service.recommend(req.concepts(), topN);
+        Integer topN = (req.getTopN() == null || req.getTopN() <= 0) ? null : req.getTopN();
+        return recoService.recommend(req.getConcepts(), topN);
     }
 }

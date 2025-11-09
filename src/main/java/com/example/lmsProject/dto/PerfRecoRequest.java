@@ -1,6 +1,19 @@
 package com.example.lmsProject.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
-public record PerfRecoRequest(
-        Integer studentId, Integer courseId, Integer threshold, Integer topN,
-        java.util.List<ConceptScore> conceptScores
-) {}
+
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class PerfRecoRequest {
+    private Integer studentId;
+    private Integer courseId;
+    private Integer threshold;
+    private Integer topN;
+    private List<ConceptScore> conceptScores;
+}
