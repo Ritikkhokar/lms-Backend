@@ -1,19 +1,15 @@
 package com.example.lmsProject.ServiceImpl;
 
-import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.SubmissionRepository;
-import com.example.lmsProject.dto.AverageMarks;
-import com.example.lmsProject.dto.UserDto;
-import com.example.lmsProject.entity.Enrollment;
-import com.example.lmsProject.entity.Submission;
-import com.example.lmsProject.service.EnrollmentService;
-import com.example.lmsProject.service.SubmissionService;
-import com.example.lmsProject.service.UserService;
+import com.example.lmsProject.dto.SubmissionDto;
+import com.example.lmsProject.entity.*;
+import com.example.lmsProject.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -23,13 +19,17 @@ public class SubmissionServiceImpl implements SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final EnrollmentService enrollmentService;
     private final UserService userService;
+    private final StorageService storageService;
+    private final AssignmentService assignmentService;
 
     public SubmissionServiceImpl(
-            SubmissionRepository repo, EnrollmentService enrollmentService, UserService userService
+            SubmissionRepository repo, EnrollmentService enrollmentService, UserService userService, StorageService storageService, AssignmentService assignmentService
     ) {
         this.submissionRepository = repo;
         this.enrollmentService = enrollmentService;
         this.userService = userService;
+        this.storageService = storageService;
+        this.assignmentService = assignmentService;
     }
 
     @Override
@@ -43,7 +43,29 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public Submission createSubmission(Submission submission) {
+    public Submission createSubmission(SubmissionDto dto) throws IOException {
+        String key = "submissions/" + dto.getUserId() + "/" + dto.getAssignmentId() + "/"
+                + System.currentTimeMillis() + "_" + dto.getFile().getOriginalFilename();
+        String s3Key = storageService.uploadFile(
+                key,
+                dto.getFile().getInputStream(),
+                dto.getFile().getSize(),
+                dto.getFile().getContentType()
+        );
+        System.out.println("Ritik -> " + s3Key);
+        Assignment assignment = assignmentService.getAssignmentById(dto.getAssignmentId());
+        if(assignment == null){
+            throw new RuntimeException("Assignment not found");
+        }
+        User user = userService.getUserById(dto.getUserId());
+        if(user == null){
+            throw new RuntimeException("user not found");
+        }
+        Submission submission = new Submission();
+        submission.setAssignment(assignment);
+        submission.setStudent(user);
+        submission.setSubmittedAt(LocalDateTime.now());
+        submission.setSubmissionUrl(s3Key); // Store the key, not URL!
         return submissionRepository.save(submission);
     }
 
@@ -66,44 +88,8 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public AverageMarks calculateAverageMarks(Integer userId) {
-        try {
-            List<Submission> submissions = getAllSubmissionsByUserId(userId);
-            int totalMarks = 0;
-            int marksObtained = 0;
-
-            for (Submission submission : submissions) {
-                if (Boolean.TRUE.equals(submission.getIs_graded())) {
-                    totalMarks += (submission.getMaximumGrade() != null) ? submission.getMaximumGrade().intValue() : 100;
-                    marksObtained += (submission.getGrade() != null) ? submission.getGrade().intValue() : 0;
-                }
-            }
-            if (totalMarks == 0) {
-                return new AverageMarks();
-            }
-            int averagePercentage = (int) (((double) marksObtained / totalMarks) * 100);
-            return new AverageMarks(new UserDto(), totalMarks, marksObtained, averagePercentage);
-        } catch (Exception e) {
-            throw new RuntimeException("Error occurred", e);
-        }
-    }
-
-    @Override
     public List<Submission> getAllSubmissionsByUserId(Integer userId) {
         return submissionRepository.findByStudent_UserId(userId);
     }
 
-    @Override
-    public List<AverageMarks> averageGradeOfEachStudentInACourse(Integer courseId) {
-        List<Enrollment> enrollments = enrollmentService.getAllEnrollmentsByCourseId(courseId);
-        List<AverageMarks> averageMarksOfStudents =  new ArrayList<>();
-        for(Enrollment enrollment : enrollments){
-            AverageMarks averageMarks = calculateAverageMarks(enrollment.getStudent().getUserId());
-            if(averageMarks != null){
-                averageMarks.setUserDto(userService.convertUserToUserDto(enrollment.getStudent()));
-                averageMarksOfStudents.add(averageMarks);
-            }
-        }
-        return averageMarksOfStudents;
-    }
 }

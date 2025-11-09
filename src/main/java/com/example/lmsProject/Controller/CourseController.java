@@ -1,5 +1,6 @@
 package com.example.lmsProject.Controller;
 
+import com.example.lmsProject.dto.AverageMarks;
 import com.example.lmsProject.dto.CoursePerformance;
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.service.CourseService;
@@ -69,4 +70,9 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getCoursePerformance(id, threshold));
     }
 
+    @GetMapping("averageGradesOfStudentsInACourse/{id}")
+    public ResponseEntity<List<AverageMarks>> averageGradesOfStudentsInACourse(@PathVariable Integer id) {
+        List<AverageMarks> averageGradesOfStudentsInACourse = courseService.averageGradeOfEachStudentInACourse(id);
+        return ResponseEntity.ok(averageGradesOfStudentsInACourse);
+    }
 }
