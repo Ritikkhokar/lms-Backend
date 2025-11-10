@@ -46,6 +46,22 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Resource createResource(ResourceDto dto) throws IOException {
         Resource resource = new Resource();
+        if (dto.getFile() != null) {
+            String key = "resource/" + dto.getCourseId() + "/" + dto.getModuleId() + "/" + dto.getTitle() + "/"
+                    + System.currentTimeMillis() + "_" + dto.getFile().getOriginalFilename();
+            String s3Key = null;
+            try {
+                s3Key = storageService.uploadFile(
+                        key,
+                        dto.getFile().getInputStream(),
+                        dto.getFile().getSize(),
+                        dto.getFile().getContentType()
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            resource.setFileUrl(s3Key);
+        }
         User user = userService.getUserById(dto.getUploadedBy());
         if (user == null){
             throw new RuntimeException("user not found");
@@ -73,7 +89,7 @@ public class ResourceServiceImpl implements ResourceService {
                 existingResource.setTitle(dto.getTitle());
             }
             if (dto.getFile() != null) {
-                String key = "submissions/" + dto.getCourseId() + "/" + dto.getModuleId() + "/" + dto.getTitle() + "/"
+                String key = "resource/" + dto.getCourseId() + "/" + dto.getModuleId() + "/" + dto.getTitle() + "/"
                         + System.currentTimeMillis() + "_" + dto.getFile().getOriginalFilename();
                 String s3Key = null;
                 try {

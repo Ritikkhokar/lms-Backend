@@ -53,7 +53,6 @@ public class SubmissionServiceImpl implements SubmissionService {
                 dto.getFile().getSize(),
                 dto.getFile().getContentType()
         );
-        System.out.println("Ritik -> " + s3Key);
         Assignment assignment = assignmentService.getAssignmentById(dto.getAssignmentId());
         if(assignment == null){
             throw new RuntimeException("Assignment not found");
