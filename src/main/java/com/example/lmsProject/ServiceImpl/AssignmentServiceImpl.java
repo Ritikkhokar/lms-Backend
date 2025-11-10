@@ -83,8 +83,9 @@ public class AssignmentServiceImpl implements AssignmentService {
             if (file != null && !file.isEmpty()) {
                 String newKey = "assignments/" + dto.getCourseId() + "/" + dto.getTitle() + "/"
                         + System.currentTimeMillis() + "_" + dto.getFile().getOriginalFilename();
+                String s3Key = null;
                 try {
-                    storageService.uploadFile(
+                    s3Key = storageService.uploadFile(
                             newKey,
                             file.getInputStream(),
                             file.getSize(),
@@ -93,7 +94,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                existing.setFileKey(newKey);
+                existing.setFileKey(s3Key);
             }
             // Update timestamp (optional for updatedAt, not createdAt!)
 //             existing.setCreatedAt(LocalDateTime.now()); // Do NOT change createdAt on update. Add an updatedAt instead if you want.
