@@ -1,5 +1,6 @@
 package com.example.lmsProject.Controller;
 
+import com.example.lmsProject.dto.ResourceDto;
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.entity.Resource;
 import com.example.lmsProject.service.ResourceService;
@@ -8,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -36,14 +39,14 @@ public class ResourceController {
     }
 
     @PostMapping
-    public ResponseEntity<Resource> createResource(@RequestBody Resource resource) {
-        Resource created = resourceService.createResource(resource);
+    public ResponseEntity<Resource> createResource(@ModelAttribute ResourceDto dto) throws IOException {
+        Resource created = resourceService.createResource(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Resource> updateResource(@PathVariable Integer id, @RequestBody Resource resource) {
-        Resource updated = resourceService.updateResource(id, resource);
+    public ResponseEntity<Resource> updateResource(@PathVariable Integer id, @ModelAttribute ResourceDto dto) {
+        Resource updated = resourceService.updateResource(id, dto);
         if (updated == null) {
             return ResponseEntity.notFound().build();
         }

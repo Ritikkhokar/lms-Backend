@@ -73,20 +73,22 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Override
     public Submission updateSubmissionForStudent(Integer id, SubmissionDto submissionDto) {
         return submissionRepository.findById(id).map(existing -> {
-            String key = "submissions/" + submissionDto.getUserId() + "/" + submissionDto.getAssignmentId() + "/"
-                    + System.currentTimeMillis() + "_" + submissionDto.getFile().getOriginalFilename();
-            String s3Key = null;
-            try {
-                s3Key = storageService.uploadFile(
-                        key,
-                        submissionDto.getFile().getInputStream(),
-                        submissionDto.getFile().getSize(),
-                        submissionDto.getFile().getContentType()
-                );
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            if(submissionDto.getFile() != null) {
+                String key = "submissions/" + submissionDto.getUserId() + "/" + submissionDto.getAssignmentId() + "/"
+                        + System.currentTimeMillis() + "_" + submissionDto.getFile().getOriginalFilename();
+                String s3Key = null;
+                try {
+                    s3Key = storageService.uploadFile(
+                            key,
+                            submissionDto.getFile().getInputStream(),
+                            submissionDto.getFile().getSize(),
+                            submissionDto.getFile().getContentType()
+                    );
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                existing.setSubmissionUrl(s3Key);
             }
-            existing.setSubmissionUrl(s3Key);
             existing.setSubmittedAt(LocalDateTime.now());
             return submissionRepository.save(existing);
         }).orElse(null);
@@ -96,9 +98,12 @@ public class SubmissionServiceImpl implements SubmissionService {
     public Submission updateSubmissionForTeacher(Integer id, SubmissionDto submissionDto) {
         return submissionRepository.findById(id).map(existing -> {
             existing.setIs_graded(Boolean.TRUE);
-            existing.setMaximumGrade(BigDecimal.valueOf(100));
-            existing.setFeedback(submissionDto.getFeedback());
-            existing.setGrade(submissionDto.getGrades());
+            if(submissionDto.getFeedback() != null){
+                existing.setFeedback(submissionDto.getFeedback());
+            }
+            if(submissionDto.getGrades() != null){
+                existing.setGrade(submissionDto.getGrades());
+            }
             return submissionRepository.save(existing);
         }).orElse(null);
     }

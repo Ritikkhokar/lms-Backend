@@ -52,7 +52,6 @@ public class AssignmentServiceImpl implements AssignmentService {
                 dto.getFile().getSize(),
                 dto.getFile().getContentType()
         );
-        System.out.println("Ritik -> " + s3Key);
         Course course = courseService.getCourseById(dto.getCourseId());
         if(course == null){
             throw new RuntimeException("Course not found");
@@ -62,7 +61,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setTitle(dto.getTitle());
         assignment.setDescription(dto.getDescription());
         assignment.setDueDate(dto.getDueDate());
-        assignment.setFileKey(s3Key); // Store the key, not URL!
+        assignment.setFileKey(s3Key);
         assignment.setCreatedAt(LocalDateTime.now());
         return assignmentRepository.save(assignment);
     }
@@ -70,17 +69,14 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public Assignment updateAssignment(Integer id, AssignmentDto dto) {
         return assignmentRepository.findById(id).map(existing -> {
-            existing.setTitle(dto.getTitle());
-            existing.setDescription(dto.getDescription());
-            existing.setDueDate(dto.getDueDate());
-
-            if (dto.getCourseId() != null &&
-                    !existing.getCourse().getCourseId().equals(dto.getCourseId())) {
-                Course course = courseService.getCourseById(dto.getCourseId());
-                if(course == null){
-                    throw new RuntimeException("Course not found");
-                }
-                existing.setCourse(course);
+            if(dto.getTitle() != null){
+                existing.setTitle(dto.getTitle());
+            }
+            if(dto.getDescription() != null){
+                existing.setDescription(dto.getDescription());
+            }
+            if(dto.getDueDate() != null){
+                existing.setDueDate(dto.getDueDate());
             }
             // Upload new file if present (file update is optional)
             MultipartFile file = dto.getFile();
@@ -100,7 +96,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 existing.setFileKey(newKey);
             }
             // Update timestamp (optional for updatedAt, not createdAt!)
-            // existing.setCreatedAt(LocalDateTime.now()); // Do NOT change createdAt on update. Add an updatedAt instead if you want.
+//             existing.setCreatedAt(LocalDateTime.now()); // Do NOT change createdAt on update. Add an updatedAt instead if you want.
             return assignmentRepository.save(existing);
         }).orElseThrow(() -> new RuntimeException("Assignment not found"));
     }
