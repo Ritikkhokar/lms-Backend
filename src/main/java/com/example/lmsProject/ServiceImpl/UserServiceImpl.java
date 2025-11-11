@@ -1,9 +1,10 @@
 package com.example.lmsProject.ServiceImpl;
-import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.UserRepository;
 import com.example.lmsProject.dto.UserDto;
 import com.example.lmsProject.entity.User;
+import com.example.lmsProject.service.EmailService;
 import com.example.lmsProject.service.UserService;
+import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
-    public UserServiceImpl(UserRepository repo) {
+    public UserServiceImpl(UserRepository repo, EmailService emailService) {
         this.userRepository = repo;
+        this.emailService = emailService;
     }
 
     @Override
@@ -31,8 +34,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public User createUser(User user) throws MessagingException {
+        User createdUser = userRepository.save(user);
+        emailService.sendCreateUserNotification(
+                createdUser.getEmail(), createdUser.getEmail(), createdUser.getPasswordHash(), createdUser.getFullName()
+        );
+        return createdUser;
     }
 
     @Override
