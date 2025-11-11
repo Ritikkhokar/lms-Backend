@@ -4,6 +4,7 @@ import com.example.lmsProject.Repository.SubmissionRepository;
 import com.example.lmsProject.dto.SubmissionDto;
 import com.example.lmsProject.entity.*;
 import com.example.lmsProject.service.*;
+import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,14 +22,16 @@ public class SubmissionServiceImpl implements SubmissionService {
     private final UserService userService;
     private final StorageService storageService;
     private final AssignmentService assignmentService;
+    private final EmailService emailService;
 
     public SubmissionServiceImpl(
-            SubmissionRepository repo, EnrollmentService enrollmentService, UserService userService, StorageService storageService, AssignmentService assignmentService
+            SubmissionRepository repo, EnrollmentService enrollmentService, UserService userService, StorageService storageService, AssignmentService assignmentService, EmailService emailService
     ) {
         this.submissionRepository = repo;
         this.userService = userService;
         this.storageService = storageService;
         this.assignmentService = assignmentService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -112,7 +115,18 @@ public class SubmissionServiceImpl implements SubmissionService {
             if(submissionDto.getGrades() != null){
                 existing.setGrade(submissionDto.getGrades());
             }
-            return submissionRepository.save(existing);
+            Submission submission = submissionRepository.save(existing);
+            try {
+                emailService.sendGradeNotification(
+                        submission.getStudent().getEmail(),
+                        submission.getAssignment().getTitle(),
+                        String.valueOf(submission.getGrade()),
+                        submission.getStudent().getFullName()
+                );
+            } catch (MessagingException e) {
+                logger.error("unable to send the notification");
+            }
+            return  submission;
         }).orElse(null);
     }
 
