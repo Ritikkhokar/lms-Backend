@@ -66,6 +66,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setStudent(user);
         submission.setSubmittedAt(LocalDateTime.now());
         submission.setSubmissionUrl(s3Key); // Store the key, not URL!
+        submission.setMaximumGrade(BigDecimal.valueOf(100));
         return submissionRepository.save(submission);
     }
 
