@@ -1,12 +1,13 @@
 package com.example.lmsProject.ServiceImpl;
 
-import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.EnrollmentRepository;
 import com.example.lmsProject.entity.Enrollment;
 import com.example.lmsProject.service.EnrollmentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -31,6 +32,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public Enrollment createEnrollment(Enrollment enrollment) {
+        enrollment.setEnrolledAt(LocalDateTime.now());
         return enrollmentRepository.save(enrollment);
     }
 
@@ -40,8 +42,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .map(existing -> {
                     existing.setStudent(enrollment.getStudent());
                     existing.setCourse(enrollment.getCourse());
-                    existing.setEnrolledAt(enrollment.getEnrolledAt());
                     existing.setEnrolledBy(enrollment.getEnrolledBy());
+                    existing.setEnrolledAt(LocalDateTime.now());
                     return enrollmentRepository.save(existing);
                 }).orElse(null);
     }

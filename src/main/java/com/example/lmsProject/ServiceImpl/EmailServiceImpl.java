@@ -31,4 +31,23 @@ public class EmailServiceImpl implements EmailService {
         helper.setText(html, true);
         mailSender.send(message);
     }
+
+    @Override
+    public void sendCreateUserNotification(
+            String to, String userEmail, String userPassword, String userName
+    ) throws MessagingException {
+        String subject = "Account created for " + userName;
+        String html = "<h3>Hello " + userName + ",</h3>"
+                + "<p>Your account for LMS created successfully"
+                + "<p>Your email for account is <b>" + userEmail + "</b> and password is  <b>" + userPassword + "</b>.</p>"
+                + "<p>Check your dashboard for further details.<br>Regards,<br>LMS Team</p>";
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(html, true);
+        mailSender.send(message);
+    }
 }
