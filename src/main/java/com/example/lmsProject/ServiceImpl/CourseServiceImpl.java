@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course createCourse(Course course) {
+        course.setCreatedAt(LocalDateTime.now());
         return courseRepository.save(course);
     }
 
@@ -55,7 +57,6 @@ public class CourseServiceImpl implements CourseService {
             existingCourse.setTitle(course.getTitle());
             existingCourse.setDescription(course.getDescription());
             existingCourse.setCreatedBy(course.getCreatedBy());
-            existingCourse.setCreatedAt(course.getCreatedAt());
             return courseRepository.save(existingCourse);
         }).orElse(null);
     }

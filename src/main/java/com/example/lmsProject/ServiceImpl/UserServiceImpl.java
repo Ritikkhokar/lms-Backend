@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) throws MessagingException {
+        user.setCreatedAt(LocalDateTime.now());
         User createdUser = userRepository.save(user);
         emailService.sendCreateUserNotification(
                 createdUser.getEmail(), createdUser.getEmail(), createdUser.getPasswordHash(), createdUser.getFullName()
@@ -49,7 +51,6 @@ public class UserServiceImpl implements UserService {
             existingUser.setEmail(user.getEmail());
             existingUser.setPasswordHash(user.getPasswordHash());
             existingUser.setRole(user.getRole());
-            existingUser.setCreatedAt(user.getCreatedAt());
             return userRepository.save(existingUser);
         }).orElse(null);
     }
