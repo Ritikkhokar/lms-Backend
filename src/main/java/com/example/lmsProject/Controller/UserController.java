@@ -3,6 +3,7 @@ package com.example.lmsProject.Controller;
 import com.example.lmsProject.dto.UserDto;
 import com.example.lmsProject.entity.User;
 import com.example.lmsProject.service.UserService;
+import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) throws MessagingException {
         User createdUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
