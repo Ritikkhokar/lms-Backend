@@ -43,6 +43,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                     existing.setStudent(enrollment.getStudent());
                     existing.setCourse(enrollment.getCourse());
                     existing.setEnrolledBy(enrollment.getEnrolledBy());
+                    existing.setEnrolledAt(LocalDateTime.now());
                     return enrollmentRepository.save(existing);
                 }).orElse(null);
     }
