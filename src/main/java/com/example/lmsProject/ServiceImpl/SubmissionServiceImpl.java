@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.util.List;
 
 @Service
@@ -57,6 +58,9 @@ public class SubmissionServiceImpl implements SubmissionService {
         if(assignment == null){
             throw new RuntimeException("Assignment not found");
         }
+        if(assignment.getDueDate().isBefore(ChronoLocalDate.from(LocalDateTime.now()))){
+            throw new RuntimeException("Assignment can not be submitted after due date");
+        }
         User user = userService.getUserById(dto.getUserId());
         if(user == null){
             throw new RuntimeException("user not found");
@@ -72,6 +76,13 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     public Submission updateSubmissionForStudent(Integer id, SubmissionDto submissionDto) {
+        Assignment assignment = assignmentService.getAssignmentById(submissionDto.getAssignmentId());
+        if(assignment == null){
+            throw new RuntimeException("Assignment not found");
+        }
+        if(assignment.getDueDate().isBefore(ChronoLocalDate.from(LocalDateTime.now()))){
+            throw new RuntimeException("Assignment can not be submitted after due date");
+        }
         return submissionRepository.findById(id).map(existing -> {
             if(submissionDto.getFile() != null) {
                 String key = "submissions/" + submissionDto.getUserId() + "/" + submissionDto.getAssignmentId() + "/"
