@@ -1,6 +1,5 @@
 package com.example.lmsProject.ServiceImpl;
 
-import com.example.lmsProject.Controller.AuthController;
 import com.example.lmsProject.Repository.EnrollmentRepository;
 import com.example.lmsProject.entity.Enrollment;
 import com.example.lmsProject.service.EnrollmentService;
