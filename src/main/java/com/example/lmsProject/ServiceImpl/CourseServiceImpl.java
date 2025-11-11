@@ -73,45 +73,67 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CoursePerformance getCoursePerformance(Integer courseId, Integer threshold) {
         Course course = courseRepository.findById(courseId).orElse(null);
-        int sumOfAverageStudentGrades = 0;
-        int studentLessThanThreshold = 0;
-        if(course!= null){
-         List<Enrollment> enrollments = enrollmentService.getAllEnrollmentsByCourseId(courseId);
-         for(Enrollment enrollment : enrollments){
-             sumOfAverageStudentGrades += calculateAverageMarks(
-                     enrollment.getStudent().getUserId()).getAveragePercentage();
-             if(calculateAverageMarks(
-                     enrollment.getStudent().getUserId()).getAveragePercentage()<threshold){
-                 studentLessThanThreshold++;
-             }
-         }
-         int averageGradeOfClass = sumOfAverageStudentGrades/enrollments.size();
-         return new CoursePerformance(course, averageGradeOfClass, studentLessThanThreshold);
-
+        if (course == null) {
+            return null;
         }
-        return null;
+
+        List<Enrollment> enrollments = enrollmentService.getAllEnrollmentsByCourseId(courseId);
+        if (enrollments == null || enrollments.isEmpty()) {
+            // Return zero averages if no enrollments found
+            return new CoursePerformance(course, 0, 0);
+        }
+
+        int sumOfAverageGrades = 0;
+        int countStudentsBelowThreshold = 0;
+
+        for (Enrollment enrollment : enrollments) {
+            AverageMarks avgMarks = calculateAverageMarks(enrollment.getStudent().getUserId());
+            int averagePercentage = (avgMarks != null) ? avgMarks.getAveragePercentage() : 0;
+
+            sumOfAverageGrades += averagePercentage;
+
+            if (averagePercentage < threshold) {
+                countStudentsBelowThreshold++;
+            }
+        }
+
+        // Prevent division by zero by guarding enrollments size > 0
+        int averageGradeOfClass = sumOfAverageGrades / enrollments.size();
+
+        return new CoursePerformance(course, averageGradeOfClass, countStudentsBelowThreshold);
     }
 
     @Override
     public AverageMarks calculateAverageMarks(Integer userId) {
         try {
             List<Submission> submissions = submissionRepository.findByStudent_UserId(userId);
-            int totalMarks = 0;
-            int marksObtained = 0;
+            if (submissions == null || submissions.isEmpty()) {
+                return new AverageMarks();
+            }
+
+            int totalMaxMarks = 0;
+            int totalMarksObtained = 0;
 
             for (Submission submission : submissions) {
                 if (Boolean.TRUE.equals(submission.getIs_graded())) {
-                    totalMarks += (submission.getMaximumGrade() != null) ? submission.getMaximumGrade().intValue() : 100;
-                    marksObtained += (submission.getGrade() != null) ? submission.getGrade().intValue() : 0;
+                    int maxGrade = (submission.getMaximumGrade() != null) ?
+                            submission.getMaximumGrade().intValue() : 100;
+                    int grade = (submission.getGrade() != null) ? submission.getGrade().intValue() : 0;
+
+                    totalMaxMarks += maxGrade;
+                    totalMarksObtained += grade;
                 }
             }
-            if (totalMarks == 0) {
+
+            if (totalMaxMarks == 0) {
                 return new AverageMarks();
             }
-            int averagePercentage = (int) (((double) marksObtained / totalMarks) * 100);
-            return new AverageMarks(new UserDto(), totalMarks, marksObtained, averagePercentage);
+
+            int averagePercentage = (int) (((double) totalMarksObtained / totalMaxMarks) * 100);
+
+            return new AverageMarks(new UserDto(), totalMaxMarks, totalMarksObtained, averagePercentage);
         } catch (Exception e) {
-            throw new RuntimeException("Error occurred", e);
+            throw new RuntimeException("Error occurred while calculating average marks for userId " + userId, e);
         }
     }
 
