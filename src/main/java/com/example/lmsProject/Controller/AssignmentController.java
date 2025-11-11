@@ -2,7 +2,9 @@ package com.example.lmsProject.Controller;
 
 import com.example.lmsProject.dto.AssignmentDto;
 import com.example.lmsProject.entity.Assignment;
+import com.example.lmsProject.entity.Submission;
 import com.example.lmsProject.service.AssignmentService;
+import com.example.lmsProject.service.SubmissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +20,11 @@ public class AssignmentController {
 
     private static final Logger logger = LoggerFactory.getLogger(AssignmentController.class);
     private final AssignmentService assignmentService;
+    private final SubmissionService submissionService;
 
-    public AssignmentController(AssignmentService service) {
+    public AssignmentController(AssignmentService service, SubmissionService submissionService) {
         this.assignmentService = service;
+        this.submissionService = submissionService;
     }
 
     @GetMapping
@@ -54,8 +58,9 @@ public class AssignmentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAssignment(@PathVariable Integer id) {
+        submissionService.deleteSubmissionsForAssignment(id);
         assignmentService.deleteAssignment(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/assignmentsByCourseId/{id}")

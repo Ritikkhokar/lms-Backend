@@ -7,7 +7,6 @@ import com.example.lmsProject.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,7 +18,6 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private static final Logger logger = LoggerFactory.getLogger(SubmissionServiceImpl.class);
     private final SubmissionRepository submissionRepository;
-    private final EnrollmentService enrollmentService;
     private final UserService userService;
     private final StorageService storageService;
     private final AssignmentService assignmentService;
@@ -28,7 +26,6 @@ public class SubmissionServiceImpl implements SubmissionService {
             SubmissionRepository repo, EnrollmentService enrollmentService, UserService userService, StorageService storageService, AssignmentService assignmentService
     ) {
         this.submissionRepository = repo;
-        this.enrollmentService = enrollmentService;
         this.userService = userService;
         this.storageService = storageService;
         this.assignmentService = assignmentService;
@@ -127,6 +124,19 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Override
     public List<Submission> getAllSubmissionsByUserId(Integer userId) {
         return submissionRepository.findByStudent_UserId(userId);
+    }
+
+    @Override
+    public List<Submission> getAllSubmissionsByAssignmentId(Integer assignmentId) {
+        return submissionRepository.findByAssignment_AssignmentId(assignmentId);
+    }
+
+    @Override
+    public void deleteSubmissionsForAssignment(Integer assignmentId){
+        List<Submission> submissions = getAllSubmissionsByAssignmentId(assignmentId);
+        for(Submission submission : submissions){
+            deleteSubmission(submission.getSubmissionId());
+        }
     }
 
 }

@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Timer;
 
 @Service
 public class AssignmentServiceImpl implements AssignmentService {
@@ -44,14 +43,19 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public Assignment createAssignment(AssignmentDto dto) throws IOException {
-        String key = "assignments/" + dto.getCourseId() + "/" + dto.getTitle() + "/"
-                + System.currentTimeMillis() + "_" + dto.getFile().getOriginalFilename();
-        String s3Key = storageService.uploadFile(
-                key,
-                dto.getFile().getInputStream(),
-                dto.getFile().getSize(),
-                dto.getFile().getContentType()
-        );
+        MultipartFile file = dto.getFile();
+        String s3Key = null;
+        if (file != null && !file.isEmpty()) {
+            String key = "assignments/" + dto.getCourseId() + "/" + dto.getTitle() + "/"
+                    + System.currentTimeMillis() + "_" + dto.getFile().getOriginalFilename();
+            s3Key = storageService.uploadFile(
+                    key,
+                    dto.getFile().getInputStream(),
+                    dto.getFile().getSize(),
+                    dto.getFile().getContentType()
+            );
+        }
+
         Course course = courseService.getCourseById(dto.getCourseId());
         if(course == null){
             throw new RuntimeException("Course not found");
@@ -104,6 +108,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public void deleteAssignment(Integer id) {
+
         assignmentRepository.deleteById(id);
     }
 

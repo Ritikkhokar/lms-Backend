@@ -15,4 +15,6 @@ public interface SubmissionService {
     Submission updateSubmissionForTeacher(Integer id, SubmissionDto submissionDto);
     void deleteSubmission(Integer id);
     List<Submission> getAllSubmissionsByUserId(Integer userId);
+    List<Submission> getAllSubmissionsByAssignmentId(Integer assignmentId);
+    void deleteSubmissionsForAssignment(Integer assignmentId);
 }

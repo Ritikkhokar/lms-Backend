@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Integer> {
     List<Submission> findByStudent_UserId(Integer userId);
+    List<Submission> findByAssignment_AssignmentId(Integer userId);
+
 }
 
 
