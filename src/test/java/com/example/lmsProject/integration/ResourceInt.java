@@ -1,6 +1,7 @@
 package com.example.lmsProject.integration;
 
 import com.example.lmsProject.Controller.ResourceController;
+import com.example.lmsProject.dto.ResourceDto;
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.entity.Module;
 import com.example.lmsProject.entity.Resource;
@@ -59,7 +60,7 @@ class ResourceInt {
         created.setModule(module);
         created.setUploadedBy(uploader);
 
-        when(resourceService.createResource(any(Resource.class))).thenReturn(created);
+        when(resourceService.createResource(any(ResourceDto.class))).thenReturn(created);
 
         mvc.perform(post("/api/resources")
                         .contentType(MediaType.APPLICATION_JSON)

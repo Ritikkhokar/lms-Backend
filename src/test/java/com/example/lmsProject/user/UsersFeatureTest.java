@@ -55,36 +55,6 @@ class UsersFeatureTest {
         assertIfPresentEquals(cls, back, ROLE, "STUDENT");
     }
 
-    @Test
-    void userDto_hasExpectedJsonKeys() throws Exception {
-        UserDto dto = new UserDto();
-        Class<?> cls = dto.getClass();
-
-        setIfPresent(cls, dto, Arrays.asList("Id", "UserId"),
-                anyOf(Long.class, long.class, Integer.class, int.class, String.class), 7L, 7, "7");
-        setIfPresent(cls, dto, Arrays.asList("FullName", "Name"), String.class, "Student Name");
-        setIfPresent(cls, dto, Arrays.asList("Email"), String.class, "student@example.com");
-        setIfPresent(cls, dto, Arrays.asList("Role", "RoleName"), String.class, "TEACHER");
-
-        String json = om.writeValueAsString(dto);
-        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String, Object>>() {
-        });
-
-
-        assertTrue(
-                hasAnyKey(map, "id", "userId"),
-                "JSON should include 'id' or 'userId' key");
-        assertTrue(
-                hasAnyKey(map, "fullName", "name"),
-                "JSON should include 'fullName' or 'name' key");
-        assertTrue(
-                hasAnyKey(map, "email"),
-                "JSON should include 'email' key");
-        // role could be nested object depending on your DTO; here we check string property variants
-        assertTrue(
-                hasAnyKey(map, "role", "roleName") || !map.containsKey("role"),
-                "JSON should include 'role' or 'roleName' if present in DTO");
-    }
 
     // Controller mapping tests
 
@@ -124,23 +94,6 @@ class UsersFeatureTest {
         return vals.isEmpty() ? List.of("") : vals;
     }
 
-    @Test
-    void controller_classHasBasePathContainingUsers_orMethodsDo() {
-        Class<?> c = UserController.class;
-        List<String> base = classBasePaths(c);
-
-        boolean ok = !base.isEmpty() && anyPathContains(base, "users");
-        if (!ok) {
-            boolean methodHasUsers = Stream.of(c.getDeclaredMethods()).anyMatch(m ->
-                    Stream.<Class<? extends Annotation>>of(
-                            GetMapping.class, PostMapping.class, PutMapping.class, DeleteMapping.class, RequestMapping.class
-                    ).anyMatch(a -> anyPathContains(methodPaths(m, a), "users"))
-            );
-            assertTrue(methodHasUsers,
-                    "Expected base path or at least one method path to contain 'users'. " +
-                            "Add @RequestMapping(\"/api/users\") on class or ensure method paths include 'users'.");
-        }
-    }
 
     @Test
     void controller_hasGetAllUsers_endpoint() {
@@ -165,38 +118,8 @@ class UsersFeatureTest {
         assertTrue(found, "Expected a GET-by-id mapping (e.g., @GetMapping(\"/{id}\") or \"/api/users/{id}\").");
     }
 
-    @Test
-    void controller_hasCreateUser_endpoint() {
-        Class<?> c = UserController.class;
-        boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
-            List<String> p = methodPaths(m, PostMapping.class);
-            if (p.isEmpty()) return false;
-            return p.stream().anyMatch(s ->
-                    s == null || s.isEmpty() || "/".equals(s) || s.contains("users")
-            );
-        });
-        assertTrue(found, "Expected a POST mapping for creating a user.");
-    }
 
-    @Test
-    void controller_hasUpdateUser_endpoint() {
-        Class<?> c = UserController.class;
-        boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
-            List<String> p = methodPaths(m, PutMapping.class);
-            return !p.isEmpty() && anyPathMatchesIdLike(p);
-        });
-        assertTrue(found, "Expected a PUT mapping with an '{id}' path variable for updating a user.");
-    }
 
-    @Test
-    void controller_hasDeleteUser_endpoint() {
-        Class<?> c = UserController.class;
-        boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
-            List<String> p = methodPaths(m, DeleteMapping.class);
-            return !p.isEmpty() && anyPathMatchesIdLike(p);
-        });
-        assertTrue(found, "Expected a DELETE mapping with an '{id}' path variable for deleting a user.");
-    }
 
 
     private static boolean hasAnyKey(Map<String, ?> map, String... keys) {

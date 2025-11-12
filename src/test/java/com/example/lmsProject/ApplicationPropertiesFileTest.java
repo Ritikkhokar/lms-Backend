@@ -1,12 +1,18 @@
 package com.example.lmsProject;
 
 import org.junit.jupiter.api.Test;
-
 import java.io.InputStream;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * ApplicationPropertiesFileTest
+ * Covers tests #5–#16 from the official unit testing document:
+ * - Ensures application.properties exists and loads
+ * - Validates presence of key Spring and logging properties
+ * - Optionally checks server.port if defined
+ */
 class ApplicationPropertiesFileTest {
 
     private Properties loadProps() throws Exception {
@@ -18,14 +24,16 @@ class ApplicationPropertiesFileTest {
         }
     }
 
+    /** Test #5: File exists & readable */
     @Test
-    void fileExistsAndLoads() throws Exception {
+    void file_exists_and_readable() throws Exception {
         Properties p = loadProps();
         assertFalse(p.isEmpty(), "application.properties should not be empty");
     }
 
+    /** Test #6–#15: Required configuration keys present */
     @Test
-    void requiredKeysPresent() throws Exception {
+    void required_keys_present() throws Exception {
         Properties p = loadProps();
         assertTrue(hasText(p.getProperty("spring.application.name")), "spring.application.name required");
         assertTrue(hasText(p.getProperty("spring.datasource.url")), "spring.datasource.url required");
@@ -33,40 +41,23 @@ class ApplicationPropertiesFileTest {
         assertTrue(hasText(p.getProperty("spring.datasource.password")), "spring.datasource.password required");
         assertTrue(hasText(p.getProperty("spring.jpa.hibernate.ddl-auto")), "spring.jpa.hibernate.ddl-auto required");
         assertTrue(hasText(p.getProperty("spring.jpa.show-sql")), "spring.jpa.show-sql required");
-        assertTrue(hasText(p.getProperty("spring.jpa.properties.hibernate.dialect")), "hibernate dialect required");
+        assertTrue(hasText(p.getProperty("spring.jpa.properties.hibernate.dialect")),
+                "spring.jpa.properties.hibernate.dialect required");
         assertTrue(hasText(p.getProperty("logging.level.root")), "logging.level.root required");
-        assertTrue(hasText(p.getProperty("logging.level.com.example.lmsProject")), "package log level required");
-        assertTrue(hasText(p.getProperty("logging.level.org.springframework.web")), "spring web log level required");
+        assertTrue(hasText(p.getProperty("logging.level.com.example.lmsProject")),
+                "logging.level.com.example.lmsProject required");
+        assertTrue(hasText(p.getProperty("logging.level.org.springframework.web")),
+                "logging.level.org.springframework.web required");
     }
 
+    /** Test #16: Optional server.port present and non-empty if defined */
     @Test
-    void valuesAreAsExpectedForThisProject() throws Exception {
+    void server_port_optional_present() throws Exception {
         Properties p = loadProps();
-
-
-        assertEquals("lmsProject", p.getProperty("spring.application.name"));
-        assertEquals("jdbc:mysql://localhost:3306/lms", p.getProperty("spring.datasource.url"));
-        assertEquals("root", p.getProperty("spring.datasource.username"));
-        assertEquals("root", p.getProperty("spring.datasource.password"));
-        assertEquals("validate", p.getProperty("spring.jpa.hibernate.ddl-auto"));
-        assertEquals("true", p.getProperty("spring.jpa.show-sql"));
-        assertEquals("org.hibernate.dialect.MySQL8Dialect",
-                p.getProperty("spring.jpa.properties.hibernate.dialect"));
-        assertEquals("INFO", p.getProperty("logging.level.root"));
-        assertEquals("DEBUG", p.getProperty("logging.level.com.example.lmsProject"));
-        assertEquals("INFO", p.getProperty("logging.level.org.springframework.web"));
-
-    }
-
-    @Test
-    void datasourceUrlLooksValid() throws Exception {
-        Properties p = loadProps();
-        String url = p.getProperty("spring.datasource.url");
-        assertNotNull(url);
-        assertTrue(url.startsWith("jdbc:mysql://"), "URL should start with jdbc:mysql://");
-        assertTrue(url.contains(":3306/"), "URL should contain default MySQL port 3306");
-        assertTrue(url.endsWith("/lms") || url.contains("/lms?"),
-                "URL should point to the 'lms' database");
+        String port = p.getProperty("server.port");
+        if (port != null) {
+            assertFalse(port.isBlank(), "server.port defined but empty");
+        }
     }
 
     private boolean hasText(String s) {

@@ -1,6 +1,7 @@
 package com.example.lmsProject.integration;
 
 import com.example.lmsProject.Controller.SubmissionController;
+import com.example.lmsProject.dto.SubmissionDto;
 import com.example.lmsProject.entity.Assignment;
 import com.example.lmsProject.entity.Submission;
 import com.example.lmsProject.entity.User;
@@ -52,7 +53,7 @@ class SubmissionInt {
 
         created.setSubmissionUrl("https://example.com/submissions/a1_u1002.pdf");
 
-        when(submissionService.createSubmission(any(Submission.class))).thenReturn(created);
+        when(submissionService.createSubmission(any(SubmissionDto.class))).thenReturn(created);
 
         mvc.perform(post("/api/submissions")
                         .contentType(MediaType.APPLICATION_JSON)

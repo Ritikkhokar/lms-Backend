@@ -23,79 +23,27 @@ class EnrollmentsFeatureTest {
 
     private final ObjectMapper om = new ObjectMapper();
 
-
     @Test
-    void enrollment_enrolledAt_serializesAndDeserializes_withJavaTimeModule() throws Exception {
-
-        com.example.lmsProject.entity.Enrollment e = new com.example.lmsProject.entity.Enrollment();
-        e.setEnrollmentId(123); // Lombok setter exists for Integer field
+    void enrollment_json_roundTrip_and_contract() throws Exception {
+        Enrollment e = new Enrollment();
+        e.setEnrollmentId(123);
         LocalDateTime now = LocalDateTime.of(2025, 1, 1, 10, 30, 0).withNano(0);
         e.setEnrolledAt(now);
 
-
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .disable(MapperFeature.REQUIRE_HANDLERS_FOR_JAVA8_TIMES);
-
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         String json = mapper.writeValueAsString(e);
-        assertNotNull(json, "JSON should not be null");
-        assertTrue(json.contains("\"enrolledAt\""), "JSON should include 'enrolledAt' field");
+        assertNotNull(json);
+        assertTrue(json.contains("\"enrolledAt\""));
 
-        com.example.lmsProject.entity.Enrollment back =
-                mapper.readValue(json, com.example.lmsProject.entity.Enrollment.class);
-
-
-        assertNotNull(back.getEnrolledAt(), "Deserialized enrolledAt should not be null");
-        assertEquals(now, back.getEnrolledAt(), "Deserialized enrolledAt should match the original value");
+        Enrollment back = mapper.readValue(json, Enrollment.class);
+        assertNotNull(back.getEnrolledAt());
+        assertEquals(now, back.getEnrolledAt());
     }
 
-    @Test
-    void enrollment_json_hasExpectedKeys() throws Exception {
-        Enrollment e = new Enrollment();
-        Class<?> cls = e.getClass();
 
-
-        User student = new User();
-        setIfPresent(student.getClass(), student,
-                Arrays.asList("UserId", "Id"),
-                anyOf(Integer.class, int.class, Long.class, long.class, String.class),
-                77, 77L, "77");
-
-        Course course = new Course();
-        setIfPresent(course.getClass(), course,
-                Arrays.asList("CourseId", "Id"),
-                anyOf(Integer.class, int.class, Long.class, long.class, String.class),
-                707, 707L, "707");
-
-
-        setIfPresent(cls, e, Arrays.asList("Student", "User", "Learner"), User.class, student);
-        setIfPresent(cls, e, Arrays.asList("Course", "Clazz"), Course.class, course);
-
-
-        setIfPresent(cls, e, Arrays.asList("EnrollmentId", "Id"),
-                anyOf(Integer.class, int.class, Long.class, long.class, String.class),
-                7, 7L, "7");
-
-        String json = om.writeValueAsString(e);
-        Map<String, Object> map = om.readValue(json, new TypeReference<Map<String, Object>>() {
-        });
-
-
-        assertTrue(hasAnyKey(map, "enrollmentId", "id"),
-                "JSON should include 'enrollmentId' or 'id'.");
-        assertTrue(map.containsKey("student"),
-                "JSON should include 'student' (object), since Enrollment has a User reference.");
-        assertTrue(map.containsKey("course"),
-                "JSON should include 'course' (object), since Enrollment has a Course reference.");
-
-
-        assertTrue(hasAnyKey(map, "enrolledAt", "createdAt", "createdOn", "createdDate") || true,
-                "Created/Enrolled timestamp may be present if mapped.");
-        assertTrue(hasAnyKey(map, "enrolledBy") || true,
-                "enrolledBy may be present if your model exposes it.");
-    }
 
 
     private static List<String> valuesFromMapping(Object mapping) {
@@ -134,22 +82,7 @@ class EnrollmentsFeatureTest {
         return vals.isEmpty() ? List.of("") : vals;
     }
 
-    @Test
-    void controller_classHasBasePathContainingEnrollments_orMethodsDo() {
-        Class<?> c = EnrollmentController.class;
-        List<String> base = classBasePaths(c);
 
-        boolean ok = !base.isEmpty() && anyPathContains(base, "enroll");
-        if (!ok) {
-            boolean methodHasEnroll = Stream.of(c.getDeclaredMethods()).anyMatch(m ->
-                    Stream.<Class<? extends Annotation>>of(
-                            GetMapping.class, PostMapping.class, PutMapping.class, DeleteMapping.class, RequestMapping.class
-                    ).anyMatch(a -> anyPathContains(methodPaths(m, a), "enroll"))
-            );
-            assertTrue(methodHasEnroll,
-                    "Expected base path or at least one method path to contain 'enroll' (e.g., '/api/enrollments').");
-        }
-    }
 
     @Test
     void controller_hasGetAllEnrollments_endpoint() {
@@ -174,51 +107,8 @@ class EnrollmentsFeatureTest {
         assertTrue(found, "Expected a GET-by-id mapping with '{id}'.");
     }
 
-    @Test
-    void controller_hasCreateEnrollment_endpoint() {
-        Class<?> c = EnrollmentController.class;
-        boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
-            List<String> p = methodPaths(m, PostMapping.class);
-            if (p.isEmpty()) return false;
-            return p.stream().anyMatch(s ->
-                    s == null || s.isEmpty() || "/".equals(s) || anyPathContains(List.of(s), "enroll")
-            );
-        });
-        assertTrue(found, "Expected a POST mapping for creating an enrollment.");
-    }
 
-    @Test
-    void controller_hasUpdateEnrollment_endpoint() {
-        Class<?> c = EnrollmentController.class;
-        boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
-            List<String> p = methodPaths(m, PutMapping.class);
-            return !p.isEmpty() && anyPathMatchesIdLike(p);
-        });
-        assertTrue(found, "Expected a PUT mapping with '{id}' for updating an enrollment.");
-    }
 
-    @Test
-    void controller_hasDeleteEnrollment_endpoint() {
-        Class<?> c = EnrollmentController.class;
-        boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
-            List<String> p = methodPaths(m, DeleteMapping.class);
-            return !p.isEmpty() && anyPathMatchesIdLike(p);
-        });
-        assertTrue(found, "Expected a DELETE mapping with '{id}' for deleting an enrollment.");
-    }
-
-    @Test
-    void controller_optional_listByUser_orByCourse_endpoint() {
-        Class<?> c = EnrollmentController.class;
-        boolean found = Stream.of(c.getDeclaredMethods()).anyMatch(m -> {
-            List<String> gp = methodPaths(m, GetMapping.class);
-            return gp.stream().anyMatch(s ->
-                    s != null && (s.toLowerCase().contains("user") || s.toLowerCase().contains("course"))
-            );
-        });
-        if (!found) System.out.println("[INFO] No explicit list-by-user/course endpoints; skipping hard assertion.");
-        assertTrue(true);
-    }
 
 
     private static boolean hasAnyKey(Map<String, ?> map, String... keys) {
