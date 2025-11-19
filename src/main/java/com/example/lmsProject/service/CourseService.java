@@ -12,6 +12,6 @@ public interface CourseService {
     void deleteCourse(Integer id);
     List<Course> getCoursesByUserId(Integer userId);
     CoursePerformance getCoursePerformance(Integer courseId, Integer threshold);
-    AverageMarks calculateAverageMarks(Integer id);
+    AverageMarks calculateAverageMarksInACourse(Integer id, Integer courseId);
     List<AverageMarks> averageGradeOfEachStudentInACourse(Integer courseId);
 }

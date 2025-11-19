@@ -1,10 +1,12 @@
 package com.example.lmsProject.ServiceImpl;
 
+import com.example.lmsProject.Repository.AssignmentRepository;
 import com.example.lmsProject.Repository.CourseRepository;
 import com.example.lmsProject.Repository.SubmissionRepository;
 import com.example.lmsProject.dto.AverageMarks;
 import com.example.lmsProject.dto.CoursePerformance;
 import com.example.lmsProject.dto.UserDto;
+import com.example.lmsProject.entity.Assignment;
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.entity.Enrollment;
 import com.example.lmsProject.entity.Submission;
@@ -27,12 +29,14 @@ public class CourseServiceImpl implements CourseService {
     private final EnrollmentService enrollmentService;
     private final SubmissionRepository submissionRepository;
     private final UserService userService;
+    private final AssignmentRepository assignmentRepository;
 
-    public CourseServiceImpl(CourseRepository repo, EnrollmentService enrollmentService, SubmissionRepository submissionRepository, UserService userService) {
+    public CourseServiceImpl(CourseRepository repo, EnrollmentService enrollmentService, SubmissionRepository submissionRepository, UserService userService, AssignmentRepository assignmentRepository) {
         this.courseRepository = repo;
         this.enrollmentService = enrollmentService;
         this.submissionRepository = submissionRepository;
         this.userService = userService;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @Override
@@ -88,7 +92,7 @@ public class CourseServiceImpl implements CourseService {
         int countStudentsBelowThreshold = 0;
 
         for (Enrollment enrollment : enrollments) {
-            AverageMarks avgMarks = calculateAverageMarks(enrollment.getStudent().getUserId());
+            AverageMarks avgMarks = calculateAverageMarksInACourse(enrollment.getStudent().getUserId(), courseId);
             int averagePercentage = (avgMarks != null) ? avgMarks.getAveragePercentage() : 0;
 
             sumOfAverageGrades += averagePercentage;
@@ -105,17 +109,27 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public AverageMarks calculateAverageMarks(Integer userId) {
+    public AverageMarks calculateAverageMarksInACourse(Integer userId, Integer courseId) {
         try {
-            List<Submission> submissions = submissionRepository.findByStudent_UserId(userId);
-            if (submissions == null || submissions.isEmpty()) {
+            List<Assignment> assignments = assignmentRepository.findByCourse_CourseId(courseId);
+            if (assignments == null || assignments.isEmpty()) {
                 return new AverageMarks();
+            }
+            List<Submission> totalSubmissions = new ArrayList<>();
+            for(Assignment assignment : assignments){
+                List<Submission> submissions = submissionRepository.findByAssignment_AssignmentIdAndStudent_UserId(
+                        assignment.getAssignmentId(), userId)
+                        ;
+
+                if (submissions != null && !submissions.isEmpty()) {
+                    totalSubmissions.addAll(submissions);
+                }
             }
 
             int totalMaxMarks = 0;
             int totalMarksObtained = 0;
 
-            for (Submission submission : submissions) {
+            for (Submission submission : totalSubmissions) {
                 if (Boolean.TRUE.equals(submission.getIs_graded())) {
                     int maxGrade = (submission.getMaximumGrade() != null) ?
                             submission.getMaximumGrade().intValue() : 100;
@@ -143,7 +157,7 @@ public class CourseServiceImpl implements CourseService {
         List<Enrollment> enrollments = enrollmentService.getAllEnrollmentsByCourseId(courseId);
         List<AverageMarks> averageMarksOfStudents =  new ArrayList<>();
         for(Enrollment enrollment : enrollments){
-            AverageMarks averageMarks = calculateAverageMarks(enrollment.getStudent().getUserId());
+            AverageMarks averageMarks = calculateAverageMarksInACourse(enrollment.getStudent().getUserId(), courseId);
             if(averageMarks != null){
                 averageMarks.setUserDto(userService.convertUserToUserDto(enrollment.getStudent()));
                 averageMarksOfStudents.add(averageMarks);
