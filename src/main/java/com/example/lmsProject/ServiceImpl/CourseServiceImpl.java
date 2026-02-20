@@ -10,11 +10,14 @@ import com.example.lmsProject.entity.Assignment;
 import com.example.lmsProject.entity.Course;
 import com.example.lmsProject.entity.Enrollment;
 import com.example.lmsProject.entity.Submission;
+import com.example.lmsProject.exception.ResourceNotFoundException;
 import com.example.lmsProject.service.CourseService;
 import com.example.lmsProject.service.EnrollmentService;
 import com.example.lmsProject.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -40,51 +43,74 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Cacheable(cacheNames = "courses")
     public List<Course> getAllCourses() {
+        logger.info("Fetching all courses from database (cache miss)");
         return courseRepository.findAll();
     }
 
     @Override
+    @Cacheable(cacheNames = "courseById", key = "#id")
     public Course getCourseById(Integer id) {
-        return courseRepository.findById(id).orElse(null);
+        logger.info("Fetching course by id {} from database (cache miss)", id);
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
     }
 
     @Override
+    @CacheEvict(cacheNames = { "courses", "courseById", "coursesByUser" }, allEntries = true)
     public Course createCourse(Course course) {
         course.setCreatedAt(LocalDateTime.now());
-        return courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+        logger.info("Created course with id {}, evicted course caches", saved.getCourseId());
+        return saved;
     }
 
     @Override
+    @CacheEvict(cacheNames = { "courses", "courseById", "coursesByUser" }, allEntries = true)
     public Course updateCourse(Integer id, Course course) {
-        return courseRepository.findById(id).map(existingCourse -> {
+        Course existingCourse = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+
+        if (course.getTitle() != null) {
             existingCourse.setTitle(course.getTitle());
+        }
+        if (course.getDescription() != null) {
             existingCourse.setDescription(course.getDescription());
+        }
+        if (course.getCreatedBy() != null) {
             existingCourse.setCreatedBy(course.getCreatedBy());
-            return courseRepository.save(existingCourse);
-        }).orElse(null);
+        }
+
+        Course updated = courseRepository.save(existingCourse);
+        logger.info("Updated course with id {}, evicted course caches", id);
+        return updated;
     }
 
     @Override
+    @CacheEvict(cacheNames = { "courses", "courseById", "coursesByUser" }, allEntries = true)
     public void deleteCourse(Integer id) {
+        if (!courseRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Course not found with id: " + id);
+        }
         courseRepository.deleteById(id);
+        logger.info("Deleted course with id {}, evicted course caches", id);
     }
 
     @Override
+    @Cacheable(cacheNames = "coursesByUser", key = "#userId")
     public List<Course> getCoursesByUserId(Integer userId) {
+        logger.info("Fetching courses by creator userId {} from database (cache miss)", userId);
         return courseRepository.findByCreatedBy_UserId(userId);
     }
 
     @Override
     public CoursePerformance getCoursePerformance(Integer courseId, Integer threshold) {
-        Course course = courseRepository.findById(courseId).orElse(null);
-        if (course == null) {
-            return null;
-        }
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
         List<Enrollment> enrollments = enrollmentService.getAllEnrollmentsByCourseId(courseId);
         if (enrollments == null || enrollments.isEmpty()) {
-            // Return zero averages if no enrollments found
             return new CoursePerformance(course, 0, 0);
         }
 
@@ -102,9 +128,7 @@ public class CourseServiceImpl implements CourseService {
             }
         }
 
-        // Prevent division by zero by guarding enrollments size > 0
         int averageGradeOfClass = sumOfAverageGrades / enrollments.size();
-
         return new CoursePerformance(course, averageGradeOfClass, countStudentsBelowThreshold);
     }
 
@@ -115,11 +139,13 @@ public class CourseServiceImpl implements CourseService {
             if (assignments == null || assignments.isEmpty()) {
                 return new AverageMarks();
             }
+
             List<Submission> totalSubmissions = new ArrayList<>();
-            for(Assignment assignment : assignments){
-                List<Submission> submissions = submissionRepository.findByAssignment_AssignmentIdAndStudent_UserId(
-                        assignment.getAssignmentId(), userId)
-                        ;
+            for (Assignment assignment : assignments) {
+                List<Submission> submissions = submissionRepository
+                        .findByAssignment_AssignmentIdAndStudent_UserId(
+                                assignment.getAssignmentId(), userId
+                        );
 
                 if (submissions != null && !submissions.isEmpty()) {
                     totalSubmissions.addAll(submissions);
@@ -131,9 +157,12 @@ public class CourseServiceImpl implements CourseService {
 
             for (Submission submission : totalSubmissions) {
                 if (Boolean.TRUE.equals(submission.getIs_graded())) {
-                    int maxGrade = (submission.getMaximumGrade() != null) ?
-                            submission.getMaximumGrade().intValue() : 100;
-                    int grade = (submission.getGrade() != null) ? submission.getGrade().intValue() : 0;
+                    int maxGrade = (submission.getMaximumGrade() != null)
+                            ? submission.getMaximumGrade().intValue()
+                            : 100;
+                    int grade = (submission.getGrade() != null)
+                            ? submission.getGrade().intValue()
+                            : 0;
 
                     totalMaxMarks += maxGrade;
                     totalMarksObtained += grade;
@@ -144,7 +173,8 @@ public class CourseServiceImpl implements CourseService {
                 return new AverageMarks();
             }
 
-            int averagePercentage = (int) (((double) totalMarksObtained / totalMaxMarks) * 100);
+            int averagePercentage =
+                    (int) (((double) totalMarksObtained / totalMaxMarks) * 100);
 
             return new AverageMarks(new UserDto(), totalMaxMarks, totalMarksObtained, averagePercentage);
         } catch (Exception e) {
@@ -155,11 +185,14 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<AverageMarks> averageGradeOfEachStudentInACourse(Integer courseId) {
         List<Enrollment> enrollments = enrollmentService.getAllEnrollmentsByCourseId(courseId);
-        List<AverageMarks> averageMarksOfStudents =  new ArrayList<>();
-        for(Enrollment enrollment : enrollments){
-            AverageMarks averageMarks = calculateAverageMarksInACourse(enrollment.getStudent().getUserId(), courseId);
-            if(averageMarks != null){
-                averageMarks.setUserDto(userService.convertUserToUserDto(enrollment.getStudent()));
+        List<AverageMarks> averageMarksOfStudents = new ArrayList<>();
+        for (Enrollment enrollment : enrollments) {
+            AverageMarks averageMarks =
+                    calculateAverageMarksInACourse(enrollment.getStudent().getUserId(), courseId);
+            if (averageMarks != null) {
+                averageMarks.setUserDto(
+                        userService.convertUserToUserDto(enrollment.getStudent())
+                );
                 averageMarksOfStudents.add(averageMarks);
             }
         }
