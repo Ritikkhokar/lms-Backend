@@ -3,9 +3,12 @@ package com.example.lmsProject.ServiceImpl;
 import com.example.lmsProject.service.EmailService;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -15,7 +18,8 @@ public class EmailServiceImpl implements EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendGradeNotification(
+    @Async("emailTaskExecutor")
+    public CompletableFuture<Void> sendGradeNotification(
             String to, String assignmentName, String grade, String studentName
     ) throws MessagingException {
         String subject = "Your grade for " + assignmentName + " is uploaded";
@@ -30,10 +34,12 @@ public class EmailServiceImpl implements EmailService {
         helper.setSubject(subject);
         helper.setText(html, true);
         mailSender.send(message);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public void sendCreateUserNotification(
+    @Async("emailTaskExecutor")
+    public CompletableFuture<Void> sendCreateUserNotification(
             String to, String userEmail, String userPassword, String userName
     ) throws MessagingException {
         String subject = "Account created for " + userName;
@@ -49,5 +55,6 @@ public class EmailServiceImpl implements EmailService {
         helper.setSubject(subject);
         helper.setText(html, true);
         mailSender.send(message);
+        return CompletableFuture.completedFuture(null);
     }
 }
