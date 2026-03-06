@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 /**
  * Async Email Tests
  */
-@SpringBootTest
+@SpringBootTest(classes = com.example.lmsProject.LmsProjectApplication.class)
 @DisplayName("Async Email Tests")
 class AsyncEmailTest {
 
@@ -33,7 +33,7 @@ class AsyncEmailTest {
     @Test
     @DisplayName("Email sending is asynchronous and returns immediately")
     void testAsyncEmailSending() throws MessagingException {
-        String testEmail = "test@example.com";
+        String testEmail = "ritikkhokar0@gmail.com";
         MimeMessage mimeMessage = mock(MimeMessage.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
         doNothing().when(javaMailSender).send(any(MimeMessage.class));

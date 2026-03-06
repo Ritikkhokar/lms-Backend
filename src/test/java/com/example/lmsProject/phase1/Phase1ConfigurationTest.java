@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Async executor configuration
  * - Retry configuration
  */
-@SpringBootTest
+@SpringBootTest(classes = com.example.lmsProject.LmsProjectApplication.class)
 @DisplayName("Phase 1 Configuration Tests")
 class Phase1ConfigurationTest {
 

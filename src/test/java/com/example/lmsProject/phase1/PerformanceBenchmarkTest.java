@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Cache hit rates
  * - Database query reduction
  */
-@SpringBootTest
+@SpringBootTest(classes = com.example.lmsProject.LmsProjectApplication.class)
 @DisplayName("Performance Benchmark Tests")
 class PerformanceBenchmarkTest {
 
