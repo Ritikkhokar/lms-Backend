@@ -61,6 +61,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'   // Uses Lettuce by default
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
+//    Retry dependency
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    testImplementation 'org.junit.platform:junit-platform-suite:1.9.3'
 }
 
 

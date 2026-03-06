@@ -116,12 +116,16 @@ public class SubmissionServiceImpl implements SubmissionService {
                 existing.setGrade(submissionDto.getGrades());
             }
             Submission submission = submissionRepository.save(existing);
-            emailService.sendGradeNotification(
-                        submission.getStudent().getEmail(),
-                        submission.getAssignment().getTitle(),
-                        String.valueOf(submission.getGrade()),
-                        submission.getStudent().getFullName()
-            );
+            try {
+                emailService.sendGradeNotification(
+                            submission.getStudent().getEmail(),
+                            submission.getAssignment().getTitle(),
+                            String.valueOf(submission.getGrade()),
+                            submission.getStudent().getFullName()
+                );
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
 
             return  submission;
         }).orElse(null);
