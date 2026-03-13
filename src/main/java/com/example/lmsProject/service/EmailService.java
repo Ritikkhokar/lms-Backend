@@ -15,4 +15,5 @@ public interface EmailService {
             String to, String userEmail, String userPassword, String userName
     ) throws MessagingException;
 
+    void sendGenericEmail(String to, String subject, String html);
 }

@@ -168,4 +168,9 @@ public class EmailServiceImpl implements EmailService {
 
         logger.error("📌 Email moved to DeadLetterQueue for manual intervention. Recipient: {}", to);
     }
+
+    @Override
+    public void sendGenericEmail(String to, String subject, String html) {
+        sendEmailWithCentralizedRetry(to, subject, html);
+    }
 }
