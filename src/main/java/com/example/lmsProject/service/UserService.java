@@ -9,7 +9,7 @@ public interface UserService {
     List<User> getAllUsers();
     User getUserById(Integer id);
     User createUser(User user) throws MessagingException;
-    User updateUser(Integer id, User user);
+    User updateUser(Integer id, User user) throws MessagingException;
     void deleteUser(Integer id);
     User findByEmail(String email);
     UserDto convertUserToUserDto(User user);

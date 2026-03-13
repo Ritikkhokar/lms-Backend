@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @CacheEvict(cacheNames = {"users", "userByEmail", "userById"}, allEntries = true)
-    public User updateUser(Integer id, User user) {
+    public User updateUser(Integer id, User user) throws MessagingException{
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -74,6 +74,9 @@ public class UserServiceImpl implements UserService {
         }
 
         User updated = userRepository.save(existingUser);
+        emailService.sendUpdateUserNotification(
+                existingUser.getEmail(), existingUser.getEmail(), existingUser.getPasswordHash(), existingUser.getFullName()
+        );
         logger.info("Updated user with id {}, evicted user caches", id);
         return updated;
     }

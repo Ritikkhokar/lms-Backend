@@ -58,6 +58,21 @@ public class EmailServiceImpl implements EmailService {
         return CompletableFuture.completedFuture(null);
     }
 
+    @Override
+    @Async("emailTaskExecutor")
+    public CompletableFuture<Void> sendUpdateUserNotification(
+            String to, String userEmail, String userPassword, String userName
+    ) throws MessagingException {
+        String subject = "Account updated for " + userName;
+        String html = "<h3>Hello " + userName + ",</h3>"
+                + "<p>Your account for LMS updated successfully"
+                + "<p>Your email for account is <b>" + userEmail + "</b> and password is  <b>" + userPassword + "</b>.</p>"
+                + "<p>Check your dashboard for further details.<br>Regards,<br>LMS Team</p>";
+
+        sendEmailWithRetry(to, subject, html);  // this method is retryable
+        return CompletableFuture.completedFuture(null);
+    }
+
 
     // Core send logic with retry
     @Retryable(

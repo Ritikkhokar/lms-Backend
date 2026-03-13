@@ -11,4 +11,8 @@ public interface EmailService {
     CompletableFuture<Void> sendCreateUserNotification(
             String to, String userEmail, String userPassword, String userName
     ) throws MessagingException;
+    CompletableFuture<Void> sendUpdateUserNotification(
+            String to, String userEmail, String userPassword, String userName
+    ) throws MessagingException;
+
 }
