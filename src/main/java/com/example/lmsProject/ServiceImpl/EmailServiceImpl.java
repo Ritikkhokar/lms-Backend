@@ -1,7 +1,9 @@
 package com.example.lmsProject.ServiceImpl;
 
 import com.example.lmsProject.Repository.DeadLetterEmailRepository;
+import com.example.lmsProject.dto.EmailMessage;
 import com.example.lmsProject.entity.DeadLetterEmail;
+import com.example.lmsProject.service.EmailMessageConsumer;
 import com.example.lmsProject.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +43,13 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     @Qualifier("emailRetryTemplate")
     private RetryTemplate emailRetryTemplate;
-
+    private RabbitMqEmailMessageProducer rabbitMqEmailMessageProducer;
     // ...existing code...
 
-    public EmailServiceImpl(JavaMailSender mailSender, DeadLetterEmailRepository deadLetterEmailRepository) {
+    public EmailServiceImpl(JavaMailSender mailSender, DeadLetterEmailRepository deadLetterEmailRepository, RabbitMqEmailMessageProducer rabbitMqEmailMessageProducer) {
         this.mailSender = mailSender;
         this.deadLetterEmailRepository = deadLetterEmailRepository;
+        this.rabbitMqEmailMessageProducer = rabbitMqEmailMessageProducer;
     }
 
     // ===== NOTIFICATION METHODS =====
@@ -64,7 +67,7 @@ public class EmailServiceImpl implements EmailService {
                 + "<p>Check your dashboard for further details.<br>Regards,<br>LMS Team</p>";
 
         // Uses emailRetryTemplate from RetryConfig (3 attempts with backoff)
-        sendEmailWithCentralizedRetry(to, subject, html);
+        rabbitMqEmailMessageProducer.publishEmail(new EmailMessage(to, subject, html));
         return CompletableFuture.completedFuture(null);
     }
 
@@ -80,7 +83,7 @@ public class EmailServiceImpl implements EmailService {
                 + "<p>Check your dashboard for further details.<br>Regards,<br>LMS Team</p>";
 
         // Uses emailRetryTemplate from RetryConfig (3 attempts with backoff)
-        sendEmailWithCentralizedRetry(to, subject, html);
+        rabbitMqEmailMessageProducer.publishEmail(new EmailMessage(to, subject, html));
         return CompletableFuture.completedFuture(null);
     }
 
@@ -96,7 +99,7 @@ public class EmailServiceImpl implements EmailService {
                 + "<p>Check your dashboard for further details.<br>Regards,<br>LMS Team</p>";
 
         // Uses emailRetryTemplate from RetryConfig (3 attempts with backoff)
-        sendEmailWithCentralizedRetry(to, subject, html);
+        rabbitMqEmailMessageProducer.publishEmail(new EmailMessage(to, subject, html));
         return CompletableFuture.completedFuture(null);
     }
 

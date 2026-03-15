@@ -1,13 +1,10 @@
 package com.example.lmsProject.ServiceImpl;
 
-import com.example.lmsProject.config.RabbitMQConfig;
 import com.example.lmsProject.dto.EmailMessage;
 import com.example.lmsProject.service.EmailMessageConsumer;
-import com.example.lmsProject.service.EmailMessageProducer;
 import com.example.lmsProject.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
