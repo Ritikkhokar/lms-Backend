@@ -3,7 +3,6 @@ package com.example.lmsProject.ServiceImpl;
 import com.example.lmsProject.Repository.DeadLetterEmailRepository;
 import com.example.lmsProject.dto.EmailMessage;
 import com.example.lmsProject.entity.DeadLetterEmail;
-import com.example.lmsProject.service.EmailMessageConsumer;
 import com.example.lmsProject.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +41,7 @@ public class EmailServiceImpl implements EmailService {
     // Can be easily changed in one place (RetryConfig)
     @Autowired
     @Qualifier("emailRetryTemplate")
-    private RetryTemplate emailRetryTemplate;
+    public RetryTemplate emailRetryTemplate;
     private RabbitMqEmailMessageProducer rabbitMqEmailMessageProducer;
     // ...existing code...
 
