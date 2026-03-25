@@ -61,8 +61,37 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: lms-kafka
+    ports:
+      - "9092:9092"   # app connects here
+      - "9093:9093"   # controller port (internal)
+    environment:
+      KAFKA_KRAFT_MODE: "true"                       # enable KRaft[web:90][web:91]
+      KAFKA_PROCESS_ROLES: "broker,controller"       # single-node broker+controller[web:90][web:91]
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092   # Spring Boot on host[web:91][web:97]
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: "Mk3OEYBSD34fcwNTJENDM2Qk"         # any random UUID-like string[web:91]
+    volumes:
+      - kafka-data:/var/lib/kafka/data              # persistent logs[web:90][web:91]
+    restart: unless-stopped
+
 volumes:
   redis-data:
   rabbitmq-data:
+  kafka-data:
 
 
